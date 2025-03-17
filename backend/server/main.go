@@ -11,10 +11,11 @@ import (
 	"cmd/server/middlewire/cors"
 	db "cmd/server/model/init"
 	"fmt"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"os"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -89,15 +90,14 @@ func main() {
 	{
 		// 用户信息
 		auth.GET("/info", info.GetUserInfo)
+		auth.GET("/allUserInfo", info.GetAllUserInfo)
 		auth.POST("/update", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 		// 监控
 		auth.POST("/install", install.InstallAgent)
 		auth.POST("/addSystemInfo", monitor.ReceiveAndStoreSystemMetrics)
-		auth.POST("/addSystemInfo", monitor.ReceiveAndStoreSystemMetrics)
 		auth.GET("/list", monitor.ListAgent)
-		router.GET("/monitor/:hostname", monitor.GetAgentInfo)
 		router.GET("/monitor/:hostname", monitor.GetAgentInfo)
 	}
 
