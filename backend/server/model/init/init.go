@@ -36,17 +36,28 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
     role_id INT REFERENCES roles(id) DEFAULT 2,
+    company_id INT DEFAULT 0,
 	token TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- company 表
+CREATE TABLE IF NOT EXISTS company (
+    id SERIAL PRIMARY KEY,
+    company_name VARCHAR UNIQUE NOT NULL,
+	memberNum int DEFAULT 0,
+	systemNUm int DEFAULT 0,
+    admin_id INT REFERENCES users(id) DEFAULT 0,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+	
 -- host表
 CREATE TABLE IF NOT EXISTS host_info (
 	id SERIAL PRIMARY KEY,
     user_name VARCHAR, -- REFERENCES users(name),
 	host_name VARCHAR(255)  UNIQUE,
-    user_name VARCHAR, -- REFERENCES users(name),
-	host_name VARCHAR(255)  UNIQUE,
+	company_id INT, -- REFERENCES company(id),
 	os TEXT NOT NULL,
 	platform TEXT NOT NULL,
 	kernel_arch TEXT NOT NULL,
@@ -56,8 +67,6 @@ CREATE TABLE IF NOT EXISTS host_info (
 -- system_info表
 CREATE TABLE IF NOT EXISTS system_info (
 	id SERIAL PRIMARY KEY,
-	host_info_id INT, -- REFERENCES host_info(id),
-	host_name VARCHAR(255), -- REFERENCES host_info(host_name),
 	host_info_id INT, -- REFERENCES host_info(id),
 	host_name VARCHAR(255), -- REFERENCES host_info(host_name),
 	cpu_info JSONB,
@@ -70,7 +79,6 @@ CREATE TABLE IF NOT EXISTS system_info (
 -- token表
 CREATE TABLE IF NOT EXISTS hostandtoken (
 	id SERIAL PRIMARY KEY,
-	host_name VARCHAR(255) , -- REFERENCES host_info(host_name),
 	host_name VARCHAR(255) , -- REFERENCES host_info(host_name),
 	token TEXT NOT NULL,
 	last_heartbeat TIMESTAMP DEFAULT NOW(),

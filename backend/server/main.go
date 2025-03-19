@@ -2,6 +2,7 @@ package main
 
 import (
 	"cmd/server/config"
+	"cmd/server/handle/admin"
 	"cmd/server/handle/agent/install"
 	"cmd/server/handle/server/monitor" // 引入 monitor 包
 	"cmd/server/handle/user/info"
@@ -94,6 +95,12 @@ func main() {
 		auth.POST("/update", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
+
+		// 公司管理员操作
+		auth.POST("/addMember", admin.AddMember)	// 添加成员
+		auth.POST("/deleteMember", admin.DeleteMember)	// 批量删除成员
+		auth.GET("/getCompanyInfo", admin.GetCompanyInfo)	// 公司信息（含成员信息）
+		
 		// 监控
 		auth.POST("/install", install.InstallAgent)
 		auth.POST("/addSystemInfo", monitor.ReceiveAndStoreSystemMetrics)
