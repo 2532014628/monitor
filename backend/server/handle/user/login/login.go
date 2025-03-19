@@ -18,6 +18,7 @@ import (
 
 // RegisterRequest 定义注册请求的数据结构
 type RegisterRequest struct {
+	Company  string `json:"company"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -94,12 +95,26 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询邮箱失败"})
 		return
 	}
-
+	// 检查公司名是否存在
+	var company u.Company
+	companyId := 0
+	err = m_init.DB.Where("name =?", input.Company).First(&company).Error
+	if err == nil {
+		companyId = company.ID
+	}else if errors.Is(err, gorm.ErrRecordNotFound) {
+		companyId = 0
+	}else{
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
+		return	
+	}
+	
 	// 创建用户
 	newUser := u.User{
 		Name:       input.Name,
 		Email:      input.Email,
 		Password:   input.Password,
+		RoleId:     0,
+		CompanyId:  companyId,
 		IsVerified: true,
 	}
 	err = m_init.DB.Create(&newUser).Error

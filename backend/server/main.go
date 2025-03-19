@@ -90,15 +90,15 @@ func main() {
 	auth := router.Group("/agent", middlewire.JWTAuthMiddleware())
 	{
 		// 用户信息
-		auth.GET("/info", info.GetUserInfo)
+		auth.GET("/userInfo", info.GetUserInfo)
 		auth.GET("/allUserInfo", info.GetAllUserInfo)
-		auth.POST("/update", update.UpdateUserInfo)
+		auth.POST("/updateUserInfo", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 
 		// 公司管理员操作
 		auth.POST("/addMember", admin.AddMember)	// 添加成员
-		auth.POST("/deleteMember", admin.DeleteMember)	// 批量删除成员
+		auth.POST("/deleteMembers", admin.DeleteMember)	// 批量删除成员
 		auth.GET("/getCompanyInfo", admin.GetCompanyInfo)	// 公司信息（含成员信息）
 		
 		// 监控

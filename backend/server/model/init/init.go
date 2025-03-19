@@ -35,22 +35,22 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR UNIQUE NOT NULL,
     password VARCHAR NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
-    role_id INT REFERENCES roles(id) DEFAULT 2,
+    role_id INT REFERENCES roles(id) DEFAULT 0,
     company_id INT DEFAULT 0,
 	token TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- company 表
-CREATE TABLE IF NOT EXISTS company (
+CREATE TABLE IF NOT EXISTS companies (
     id SERIAL PRIMARY KEY,
-    company_name VARCHAR UNIQUE NOT NULL,
+    name VARCHAR UNIQUE NOT NULL,
 	memberNum int DEFAULT 0,
-	systemNUm int DEFAULT 0,
+	systemNum int DEFAULT 0,
     admin_id INT REFERENCES users(id) DEFAULT 0,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
 	
 -- host表
 CREATE TABLE IF NOT EXISTS host_info (
@@ -86,7 +86,6 @@ CREATE TABLE IF NOT EXISTS hostandtoken (
 );
 
 -- 在system_info表的host_info_id字段上创建索引，加速通过主机ID查找系统信息
--- CREATE INDEX IF NOT EXISTS idx_system_info_host_info_id ON system_info(host_info_id);
 -- CREATE INDEX IF NOT EXISTS idx_system_info_host_info_id ON system_info(host_info_id);
 
 -- 对于system_info表中的JSONB字段(cpu_info, memory_info等)，如果需要根据某些键值进行查询，
@@ -250,26 +249,33 @@ func InitDBData() error {
 	}
 	fmt.Println("2---------------")
 
+	// 插入公司数据
+	if err := insertCompanies(tx); err != nil {
+		tx.Rollback() // 回滚事务
+		return err    // 返回插入用户时的错误
+	}
+	fmt.Println("3---------------")
+
 	// 插入 host_info 数据
 	if err := insertHostInfo(tx); err != nil {
 		tx.Rollback() // 回滚事务
 		return err    // 返回插入主机信息时的错误
 	}
-	fmt.Println("3---------------")
+	fmt.Println("4---------------")
 
 	// 插入 system_info 数据
 	if err := insertSystemInfo(tx); err != nil {
 		tx.Rollback() // 回滚事务
 		return err    // 返回插入系统信息时的错误
 	}
-	fmt.Println("4---------------")
+	fmt.Println("5---------------")
 
 	// 插入 hostandtoken 数据
 	if err := insertHostAndToken(tx); err != nil {
 		tx.Rollback() // 回滚事务
 		return err    // 返回插入 token 信息时的错误
 	}
-	fmt.Println("5---------------")
+	fmt.Println("6---------------")
 
 	if err := tx.Commit().Error; err != nil {
 		return err // 返回提交事务时的错误
@@ -316,17 +322,22 @@ func insertUsers(tx *gorm.DB) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
 		parts := strings.Split(line, ",")
-		if len(parts) < 4 {
+		if len(parts) < 5 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
-
 		name := parts[0]
 		email := parts[1]
 		password := parts[2]
 		roleID := parts[3]
+		companyID := parts[4]
 
-		if err := tx.Exec("INSERT INTO users (name, email, password, role_id) VALUES (?, ?, ?, ?)", name, email, password, roleID).Error; err != nil {
+		if err := tx.Exec("INSERT INTO users (name, email, password, role_id, company_id) VALUES (?, ?, ?, ?, ?)", name, email, password, roleID, companyID).Error; err != nil {
 			return fmt.Errorf("failed to insert user %s: %w", name, err)
 		}
 	}
@@ -344,19 +355,58 @@ func insertHostInfo(tx *gorm.DB) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
 		parts := strings.Split(line, ",")
-		if len(parts) < 5 {
+		if len(parts) < 6 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
 
 		userName := parts[0]
 		hostname := parts[1]
-		os := parts[2]
-		platform := parts[3]
-		kernelArch := parts[4]
+		companyId := parts[2]
+		os := parts[3]
+		platform := parts[4]
+		kernelArch := parts[5]
 
-		if err := tx.Exec("INSERT INTO host_info (user_name, host_name, os, platform, kernel_arch) VALUES (?, ?, ?, ?, ?)", userName, hostname, os, platform, kernelArch).Error; err != nil {
+		if err := tx.Exec("INSERT INTO host_info (user_name, host_name, company_id, os, platform, kernel_arch) VALUES (?, ?, ?, ?, ?, ?)", userName, hostname, companyId, os, platform, kernelArch).Error; err != nil {
 			return fmt.Errorf("failed to insert host_info for %s: %w", hostname, err)
+		}
+	}
+	return scanner.Err()
+}
+
+// insertUsers 函数从 users.txt 文件中读取用户数据
+func insertCompanies(tx *gorm.DB) error {
+	file, err := os.Open("asset/example/companies.txt")
+	if err != nil {
+		return fmt.Errorf("failed to open companies file: %w", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
+		parts := strings.Split(line, ",")
+		if len(parts) < 5 {
+			return fmt.Errorf("invalid line format: %s", line)
+		}
+
+		name := parts[0]
+		memberNum := parts[1]
+		systemNum := parts[2]
+		admin_id := parts[3]
+		description := parts[4]
+		if err := tx.Exec("INSERT INTO companies (name, memberNum, systemNum, admin_id, description) VALUES (?, ?, ?, ?, ?)", name, memberNum, systemNum, admin_id, description).Error; err != nil {
+			return fmt.Errorf("failed to insert user %s: %w", name, err)
 		}
 	}
 	return scanner.Err()
@@ -427,6 +477,11 @@ func insertHostAndToken(tx *gorm.DB) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
 		parts := strings.Split(line, ",")
 		if len(parts) < 3 {
 			return fmt.Errorf("invalid line format: %s", line)
