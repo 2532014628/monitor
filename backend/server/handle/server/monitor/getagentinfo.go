@@ -12,7 +12,7 @@ import (
 
 // GetAgentInfo 用于查询特定主机信息
 func GetAgentInfo(c *gin.Context) {
-	db, err := model.InitDB()
+	db, _, err := model.InitDB()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "数据库初始化失败"})
 		return

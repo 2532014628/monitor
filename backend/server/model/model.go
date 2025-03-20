@@ -13,9 +13,10 @@ import (
 )
 
 var DB *sql.DB
+var TDengine *sql.DB
 
 // 连接数据库并创建表
-func InitDB() (db *sql.DB, err error) { //
+func InitDB() (db *sql.DB,tdengine *sql.DB, err error) { //
 	// connStr := "host=192.168.31.251 port=5432 user=postgres password=cCyjKKMyweCer8f3 dbname=monitor sslmode=disable"
 	config, _ := config.LoadConfig()
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -28,9 +29,24 @@ func InitDB() (db *sql.DB, err error) { //
 	
 	DB, err = sql.Open("postgres", connStr)
 	if err != nil {
-		return DB,err
+		return DB,nil,err
 	}
-	return DB,nil
+
+	//connStr := "root:taosdata@tcp(127.0.0.1:6030)/severmonitor"
+	connStr = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+		config.TDengine.User,
+		config.TDengine.Password,
+		config.TDengine.Host,
+		config.TDengine.Port,
+		config.TDengine.Name,
+	)
+
+	TDengine, err = sql.Open("taosSql", connStr)
+	if err != nil {
+		return DB,TDengine,err
+	}
+
+	return DB,TDengine,nil
 }
 
 type RequestData struct {
@@ -90,6 +106,11 @@ type NetworkInfo struct {
 	BytesRecv uint64 `json:"bytes_recv"` // 接收字节数
 	BytesSent uint64 `json:"bytes_sent"` // 发送字节数
 	// CreatedAt time.Time `json:"net_info_created_at"`
+}
+
+type HostData struct {
+	Time string    `json:"time"`
+	Data HostInfo  `json:"data"`
 }
 
 type CPUData struct {
@@ -160,115 +181,88 @@ func InsertHostInfo(hostInfo HostInfo, username string) error {
 	return nil
 }
 
-func InsertSystemInfo(db *sql.DB, hostname string, cpuInfo []CPUInfo, memoryInfo MemoryInfo, processInfo ProcessInfo, networkInfo NetworkInfo) error {
+func InsertSystemInfo(db *sql.DB,tdengineDB *sql.DB, hostname string, hostInfo HostInfo,cpuInfo []CPUInfo, memoryInfo MemoryInfo, processInfo ProcessInfo, networkInfo NetworkInfo) error {
 	// 检查是否已经存在对应的 system_info 记录
-	var existingID int
-	var hostInfoID int
-	var cpuInfoJSON, memoryInfoJSON, processInfoJSON, networkInfoJSON []byte
+	var exists bool
 
 	// 查询是否存在
 	querySQL := `
-	SELECT id
-	FROM host_info
-	WHERE host_name = $1
-	ORDER BY created_at DESC LIMIT 1`
+	SELECT EXISTS (
+        SELECT 1
+        FROM host_info
+        WHERE host_name = $1
+		ORDER BY created_at DESC LIMIT 1
+    )`
 
-	err := db.QueryRow(querySQL, hostname).Scan(&hostInfoID)
+	err := db.QueryRow(querySQL, hostname).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
-		return fmt.Errorf("InsertSystemInfo : failed to query host_info's id: %v", err)
+		return fmt.Errorf("InsertSystemInfo : failed to query host_info's existence: %v", err)
+	}
+	if !exists {
+		return fmt.Errorf("InsertSystemInfo : host_info with hostname '%s' does not exist", hostname)
 	}
 
-	// 查询是否存在
-	querySQL = `
-	SELECT id, cpu_info, memory_info, process_info, network_info
-	FROM system_info
-	WHERE host_info_id = $1
-	ORDER BY created_at DESC LIMIT 1`
-
-	err = db.QueryRow(querySQL, hostInfoID).Scan(&existingID, &cpuInfoJSON, &memoryInfoJSON, &processInfoJSON, &networkInfoJSON)
-	if err != nil && err != sql.ErrNoRows {
-		return fmt.Errorf("failed to query system_info: %v", err)
+	tableName := fmt.Sprintf("%s_system_info", hostname)
+	// 查询在TDengine中该子表是否存在
+	querySQL = fmt.Sprintf(`
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_name = '%s'
+    `, tableName)
+	err = TDengine.QueryRow(querySQL).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to query table's existence: %v", err)
 	}
-	fmt.Println("InsertSystemInfo : existingID 为", existingID)
 
-	if existingID > 0 {
-		fmt.Println("InsertSystemInfo : The hostId already exists!")
-		//UpdateSystemInfo(db, hostInfoID, cpuInfo, memoryInfo, processInfo, networkInfo)
+	if exists {
+		fmt.Println("InsertSystemInfo : The table already exists!")
 		return nil
 	}
 	// 获取当前时间并格式化
-	currentTime := time.Now().UTC().Format(time.RFC3339)
+	currentTime := time.Now().Format("2006-01-02 15:04:05") // 格式化时间为TDengine接受的格式
 
+	// 创建新的数据实例
+	hostData := HostData{
+		Time: currentTime,
+		Data: hostInfo,
+	}
+	hostDataJSON, err := json.Marshal(hostData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal hostData: %v", err)
+	}
 	// 创建新的数据实例
 	cpuData := CPUData{
 		Time: currentTime,
 		Data: cpuInfo,
 	}
+	cpuDataJSON, err := json.Marshal(cpuData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal cpuData: %v", err)
+	}
 	memoryData := MemoryData{
 		Time: currentTime,
 		Data: memoryInfo,
 	}
+	memoryDataJSON, err := json.Marshal(memoryData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal memoryData: %v", err)
+	}
+	
 	processData := ProcessData{
 		Time: currentTime,
 		Data: processInfo,
+	}
+	processDataJSON, err := json.Marshal(processData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal processData: %v", err)
 	}
 	networkData := NetworkData{
 		Time: currentTime,
 		Data: networkInfo,
 	}
-
-	// 处理 CPU 信息
-	var cpuInfoArray []CPUData
-	if existingID > 0 {
-		// 如果已存在记录，反序列化现有的 cpu_info JSON
-		if err := json.Unmarshal(cpuInfoJSON, &cpuInfoArray); err != nil {
-			return fmt.Errorf("failed to unmarshal existing cpu_info: %v", err)
-		}
-	}
-	// 将新的 CPUData 添加到数组中
-	cpuInfoArray = append(cpuInfoArray, cpuData)
-	cpuInfoData, err := json.Marshal(cpuInfoArray)
+	networkDataJSON, err := json.Marshal(networkData)
 	if err != nil {
-		return fmt.Errorf("failed to marshal updated cpu_info: %v", err)
-	}
-
-	// 处理 Memory 信息
-	var memoryInfoArray []MemoryData
-	if existingID > 0 {
-		if err := json.Unmarshal(memoryInfoJSON, &memoryInfoArray); err != nil {
-			return fmt.Errorf("failed to unmarshal existing memory_info: %v", err)
-		}
-	}
-	memoryInfoArray = append(memoryInfoArray, memoryData)
-	memoryInfoData, err := json.Marshal(memoryInfoArray)
-	if err != nil {
-		return fmt.Errorf("failed to marshal updated memory_info: %v", err)
-	}
-
-	// 处理 Process 信息
-	var processInfoArray []ProcessData
-	if existingID > 0 {
-		if err := json.Unmarshal(processInfoJSON, &processInfoArray); err != nil {
-			return fmt.Errorf("failed to unmarshal existing process_info: %v", err)
-		}
-	}
-	processInfoArray = append(processInfoArray, processData)
-	processInfoData, err := json.Marshal(processInfoArray)
-	if err != nil {
-		return fmt.Errorf("failed to marshal updated process_info: %v", err)
-	}
-
-	// 处理 Network 信息
-	var networkInfoArray []NetworkData
-	if existingID > 0 {
-		if err := json.Unmarshal(networkInfoJSON, &networkInfoArray); err != nil {
-			return fmt.Errorf("failed to unmarshal existing network_info: %v", err)
-		}
-	}
-	networkInfoArray = append(networkInfoArray, networkData)
-	networkInfoData, err := json.Marshal(networkInfoArray)
-	if err != nil {
-		return fmt.Errorf("failed to marshal updated network_info: %v", err)
+		return fmt.Errorf("InsertSystemInfo : failed to marshal networkData: %v", err)
 	}
 
 	// if existingID > 0 {
@@ -288,17 +282,23 @@ func InsertSystemInfo(db *sql.DB, hostname string, cpuInfo []CPUInfo, memoryInfo
 	// 	// fmt.Println("Updated existing system_info successfully")
 	// } else {
 	// 插入新的记录
-	insertSQL := `
-		INSERT INTO system_info (host_info_id, host_name,cpu_info, memory_info, process_info, network_info, created_at)
-		VALUES ($1, $2, $3, $4, $5,$6 ,CURRENT_TIMESTAMP)`
-
-	_, err = DB.Exec(insertSQL, hostInfoID, hostname, cpuInfoData, memoryInfoData, processInfoData, networkInfoData)
-	if err != nil {
-		return fmt.Errorf("failed to insert system_info: %v", err)
+	//创建对应的子表，并插入数据
+	createTable :=fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s USING system_info TAGS (host_name= "%s")
+	`,tableName,hostname)
+	if _, err = TDengine.Exec(createTable); err != nil {
+		return fmt.Errorf("failed to create table for host %s: %w", hostname, err)
 	}
-	fmt.Println("Inserted new system_info successfully")
-	// }
-
+	// 将新数据插入到TDengine中
+	insertData := fmt.Sprintf(`
+		INSERT INTO %s (created_at, host_name, host_info, cpu_info, memory_info, process_info, network_info) 
+		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')
+	`, tableName, currentTime, hostname, string(hostDataJSON), string(cpuDataJSON), string(memoryDataJSON), string(processDataJSON), string(networkDataJSON))
+	_, err = TDengine.Exec(insertData)
+	if err != nil {
+		return fmt.Errorf("failed to insert data into table for host %s: %w", hostname, err)
+	}
+	fmt.Println("Data inserted successfully!")
 	return nil
 }
 
@@ -719,7 +719,7 @@ func UpdateHostInfo(db *sql.DB, host_id int, host_info map[string]string) error 
 	//查看该主机的host_id是否存在
 	err := db.QueryRow("SELECT id FROM host_info WHERE host_id = ", host_id).Scan(&host_id)
 	if err != nil {
-		return fmt.Errorf("failed to query host_info table: %v")
+		return fmt.Errorf("failed to query host_info table")
 	}
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("no matching host_id found in host_info table")
@@ -736,162 +736,82 @@ func UpdateHostInfo(db *sql.DB, host_id int, host_info map[string]string) error 
 }
 
 // 更新系统信息
-func UpdateSystemInfo(hostInfoID int, cpuInfo []CPUInfo, memoryInfo MemoryInfo, processInfo ProcessInfo, networkInfo NetworkInfo) error {
-	// 查询system_info表中的host_id是否存在
-	var existingID int
-	err := DB.QueryRow("SELECT id FROM system_info WHERE host_info_id = $1", hostInfoID).Scan(&existingID)
+func UpdateSystemInfo(hostName string,hostInfo HostInfo, cpuInfo []CPUInfo, memoryInfo MemoryInfo, processInfo ProcessInfo, networkInfo NetworkInfo) error {
+	// 查询system_info对应子表否存在
+	var exists bool
+
+	tableName := fmt.Sprintf("%s_system_info", hostName)
+	// 查询在TDengine中该子表是否存在
+	querySQL := fmt.Sprintf(`
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_name = '%s'
+    `, tableName)
+	err := TDengine.QueryRow(querySQL).Scan(&exists)
 	if err != nil {
-		return fmt.Errorf("failed to query system_info table: %v", err)
+		return fmt.Errorf("InsertSystemInfo : failed to query table's existence: %v", err)
 	}
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("no matching host_id found in system_info table")
+		return fmt.Errorf("no matching table found in TDengine")
 	}
 
-	tx, err := DB.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %v", err)
+	if !exists{
+		return fmt.Errorf("InsertSystemInfo : table does not exist")
 	}
 
 	// 获取当前时间并格式化
-	currentTime := time.Now().UTC().Format(time.RFC3339)
+	currentTime := time.Now().Format("2006-01-02 15:04:05") // 格式化时间为TDengine接受的格式
 
-	// 删除超过7天的数据
-	sevenDaysAgo := time.Now().UTC().AddDate(0, 0, -7).Format(time.RFC3339)
-	deleteSQL := `
-        UPDATE system_info
-        SET cpu_info = (SELECT jsonb_agg(elem) FROM jsonb_array_elements(cpu_info) AS elem WHERE (elem->>'time')::timestamp >= $1),
-            memory_info = (SELECT jsonb_agg(elem) FROM jsonb_array_elements(memory_info) AS elem WHERE (elem->>'time')::timestamp >= $1),
-            process_info = (SELECT jsonb_agg(elem) FROM jsonb_array_elements(process_info) AS elem WHERE (elem->>'time')::timestamp >= $1),
-            network_info = (SELECT jsonb_agg(elem) FROM jsonb_array_elements(network_info) AS elem WHERE (elem->>'time')::timestamp >= $1)
-        WHERE host_info_id = $2
-    `
-	_, err = tx.Exec(deleteSQL, sevenDaysAgo, hostInfoID)
+	// 创建新的数据实例
+	hostData := HostData{
+		Time: currentTime,
+		Data: hostInfo,
+	}
+	hostDataJSON, err := json.Marshal(hostData)
 	if err != nil {
-		return err
+		return fmt.Errorf("InsertSystemInfo : failed to marshal hostData: %v", err)
 	}
-
-	// 初始化 existingData
-	existingData := make(map[string]json.RawMessage)
-
-	// 查询现有数据
-	querySQL := `
-		SELECT cpu_info, memory_info, process_info, network_info
-		FROM system_info
-		WHERE host_info_id = $1
-	`
-	var cpuInfoJSON, memoryInfoJSON, processInfoJSON, networkInfoJSON json.RawMessage
-	err = tx.QueryRow(querySQL, hostInfoID).Scan(&cpuInfoJSON, &memoryInfoJSON, &processInfoJSON, &networkInfoJSON)
-	if err != nil && err != sql.ErrNoRows {
-		return err
+	cpuData := CPUData{
+		Time: currentTime,
+		Data: cpuInfo,
 	}
-
-	// 将查询结果赋值给 existingData
-	existingData["cpu_info"] = cpuInfoJSON
-	existingData["memory_info"] = memoryInfoJSON
-	existingData["process_info"] = processInfoJSON
-	existingData["network_info"] = networkInfoJSON
-
-	//处理cpu
-	if len(cpuInfo) > 0 {
-		var cpuInfoArray []CPUData
-		if existingData["cpu_info"] != nil {
-			if err := json.Unmarshal(existingData["cpu_info"], &cpuInfoArray); err != nil {
-				return err
-			}
-		}
-
-		// 遍历 cpuInfo 切片，创建新的 CPUData 实例
-		cpuData := CPUData{
-			Time: currentTime,
-			Data: cpuInfo,
-		}
-		cpuInfoArray = append(cpuInfoArray, cpuData)
-
-		// 序列化更新后的 CPUInfoArray
-		cpuInfoJSON, err := json.Marshal(cpuInfoArray)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		existingData["cpu_info"] = cpuInfoJSON
-	}
-
-	// 处理 Memory 信息
-	if memoryInfo != (MemoryInfo{}) {
-		var memoryInfoArray []MemoryData
-		if existingData["memory_info"] != nil {
-			if err := json.Unmarshal(existingData["memory_info"], &memoryInfoArray); err != nil {
-				return err
-			}
-		}
-		memoryData := MemoryData{
-			Time: currentTime,
-			Data: memoryInfo,
-		}
-		memoryInfoArray = append(memoryInfoArray, memoryData)
-		memoryInfoJSON, err := json.Marshal(memoryInfoArray)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		existingData["memory_info"] = memoryInfoJSON
-	}
-
-	// 处理 Process 信息
-	if processInfo != (ProcessInfo{}) {
-		var processInfoArray []ProcessData
-		if existingData["process_info"] != nil {
-			if err := json.Unmarshal(existingData["process_info"], &processInfoArray); err != nil {
-				return err
-			}
-		}
-		processData := ProcessData{
-			Time: currentTime,
-			Data: processInfo,
-		}
-		processInfoArray = append(processInfoArray, processData)
-		processInfoJSON, err := json.Marshal(processInfoArray)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		existingData["process_info"] = processInfoJSON
-	}
-
-	// 处理 Network 信息
-	if networkInfo != (NetworkInfo{}) {
-		var networkInfoArray []NetworkData
-		if existingData["network_info"] != nil {
-			if err := json.Unmarshal(existingData["network_info"], &networkInfoArray); err != nil {
-				return err
-			}
-		}
-		networkData := NetworkData{
-			Time: currentTime,
-			Data: networkInfo,
-		}
-		networkInfoArray = append(networkInfoArray, networkData)
-		networkInfoJSON, err := json.Marshal(networkInfoArray)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-		existingData["network_info"] = networkInfoJSON
-	}
-
-	// 更新数据库
-	updateSQL := `
-        UPDATE system_info
-        SET cpu_info = COALESCE($1, cpu_info),
-            memory_info = COALESCE($2, memory_info),
-            process_info = COALESCE($3, process_info),
-            network_info = COALESCE($4, network_info),
-        WHERE host_info_id = $5
-    `
-	_, err = tx.Exec(updateSQL, existingData["cpu_info"], existingData["memory_info"], existingData["process_info"], existingData["network_info"], hostInfoID)
+	cpuDataJSON, err := json.Marshal(cpuData)
 	if err != nil {
-		tx.Rollback()
-		return err
+		return fmt.Errorf("InsertSystemInfo : failed to marshal cpuData: %v", err)
+	}
+	memoryData := MemoryData{
+		Time: currentTime,
+		Data: memoryInfo,
+	}
+	memoryDataJSON, err := json.Marshal(memoryData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal memoryData: %v", err)
+	}
+	processData := ProcessData{
+		Time: currentTime,
+		Data: processInfo,
+	}
+	processDataJSON, err := json.Marshal(processData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal processData: %v", err)
+	}
+	networkData := NetworkData{
+		Time: currentTime,
+		Data: networkInfo,
+	}
+	networkDataJSON, err := json.Marshal(networkData)
+	if err != nil {
+		return fmt.Errorf("InsertSystemInfo : failed to marshal networkData: %v", err)
+	}
+
+	// 将新数据插入到TDengine中
+	insertData := fmt.Sprintf(`
+		INSERT INTO %s (created_at, host_name, host_info, cpu_info, memory_info, process_info, network_info) 
+		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')
+	`, tableName, currentTime, hostName, string(hostDataJSON), string(cpuDataJSON), string(memoryDataJSON), string(processDataJSON), string(networkDataJSON))
+	_, err = TDengine.Exec(insertData)
+	if err != nil {
+		return fmt.Errorf("failed to insert data into table for host %s: %w", hostName, err)
 	}
 
 	return nil
