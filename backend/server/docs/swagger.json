@@ -1,0 +1,398 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Server Management API",
+        "version": "1.0.0",
+        "contact": {}
+    },
+    "paths": {
+        "/login": {
+            "post": {
+                "description": "用于用户登录，需要提供用户名和密码，并返回JWT token。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "登录信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/login.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求数据格式错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "用户不存在或密码错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/monitor": {
+            "post": {
+                "description": "该API用于接收客户端发送的系统监控数据，并验证token和JWT后将数据存储到数据库中。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Monitor"
+                ],
+                "summary": "接收系统监控信息（CPU、内存、主机信息等）",
+                "parameters": [
+                    {
+                        "description": "请求体包含系统监控数据",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/monitor.RequestData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "成功响应",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "无效的JSON数据或令牌长度错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "授权头缺失或无效的token格式或无效的JWT token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "数据库操作失败",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "通过提供用户名、邮箱和密码来注册新用户。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "用户注册",
+                "parameters": [
+                    {
+                        "description": "注册信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/login.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "注册成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "请求数据格式错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "用户名或邮箱验证失败",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "login.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "login.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CPUInfo": {
+            "type": "object",
+            "properties": {
+                "cores_num": {
+                    "type": "integer"
+                },
+                "cpu_info_created_at": {
+                    "description": "添加 CreatedAt 字段",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "添加 ID 字段",
+                    "type": "integer"
+                },
+                "model_name": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.HostInfo": {
+            "type": "object",
+            "properties": {
+                "host_info_created_at": {
+                    "description": "添加 CreatedAt 字段",
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "添加 ID 字段",
+                    "type": "integer"
+                },
+                "kernel_arch": {
+                    "type": "string"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.MemoryInfo": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "string"
+                },
+                "free": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "添加 ID 字段",
+                    "type": "integer"
+                },
+                "mem_info_created_at": {
+                    "description": "添加 CreatedAt 字段",
+                    "type": "string"
+                },
+                "total": {
+                    "type": "string"
+                },
+                "used": {
+                    "type": "string"
+                },
+                "user_percent": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.NetworkInfo": {
+            "type": "object",
+            "properties": {
+                "bytes_recv": {
+                    "description": "接收字节数",
+                    "type": "integer"
+                },
+                "bytes_sent": {
+                    "description": "发送字节数",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "net_info_created_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ProcessInfo": {
+            "type": "object",
+            "properties": {
+                "cmdline": {
+                    "type": "string"
+                },
+                "cpu_percent": {
+                    "type": "number"
+                },
+                "id": {
+                    "description": "添加 ID 字段",
+                    "type": "integer"
+                },
+                "mem_percent": {
+                    "type": "number"
+                },
+                "pid": {
+                    "type": "integer"
+                },
+                "pro_info_created_at": {
+                    "description": "添加 CreatedAt 字段",
+                    "type": "string"
+                }
+            }
+        },
+        "monitor.RequestData": {
+            "description": "RequestData 包含所有需要收集的系统信息",
+            "type": "object",
+            "properties": {
+                "cpu_info": {
+                    "description": "CPU 信息",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.CPUInfo"
+                    }
+                },
+                "host_info": {
+                    "description": "主机信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.HostInfo"
+                        }
+                    ]
+                },
+                "mem_info": {
+                    "description": "内存信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.MemoryInfo"
+                        }
+                    ]
+                },
+                "net_info": {
+                    "description": "网络信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.NetworkInfo"
+                        }
+                    ]
+                },
+                "pro_info": {
+                    "description": "进程信息",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ProcessInfo"
+                    }
+                }
+            }
+        }
+    }
+}
