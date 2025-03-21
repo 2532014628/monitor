@@ -17,6 +17,7 @@ Thumbs.db
 __pycache__/
 
 # 忽略构建和编译输出
+.idea
 .idea/
 .vscode/
 dist/
@@ -117,6 +118,7 @@ coverage/
 # 忽略IDE和编辑器生成的文件
 .vscode/
 .idea/
+*.xml
 *.iml
 *.ipynb_checkpoints/
 *.swp
