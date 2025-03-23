@@ -3,19 +3,23 @@ package init
 import (
 	"bufio"
 	u "cmd/server/model/user"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+
 	//"regexp"
 	"strings"
 
+	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-//属性均用驼峰命名转换后的含_的，表名就不含_。
+// 属性均用驼峰命名转换后的含_的，表名就不含_。
 const createTableSQL = `
 -- roles 表
 CREATE TABLE IF NOT EXISTS roles (
@@ -31,15 +35,29 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR UNIQUE NOT NULL,
     password VARCHAR NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
-    role_id INT REFERENCES roles(id) DEFAULT 2,
+    role_id INT REFERENCES roles(id) DEFAULT 0,
+    company_id INT DEFAULT 0,
+	token TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- company 表
+CREATE TABLE IF NOT EXISTS companies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR UNIQUE NOT NULL,
+	memberNum int DEFAULT 0,
+	systemNum int DEFAULT 0,
+    admin_id INT REFERENCES users(id) DEFAULT 0,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+	
 -- host表
 CREATE TABLE IF NOT EXISTS host_info (
 	id SERIAL PRIMARY KEY,
     user_name VARCHAR, -- REFERENCES users(name),
 	host_name VARCHAR(255)  UNIQUE,
+	company_id INT, -- REFERENCES company(id),
 	os TEXT NOT NULL,
 	platform TEXT NOT NULL,
 	kernel_arch TEXT NOT NULL,
@@ -83,32 +101,61 @@ CREATE INDEX IF NOT EXISTS idx_hostandtoken_last_heartbeat ON hostandtoken(last_
 `
 
 // cpu_info示例，每次一新的数据就追加进json里面，这样可以保存多个时间戳的数据
-// {
-//     "cpu_info": [
-//         {
-//             "time": "2023-10-10T12:34:56Z",
-//             "data": {
-//                 "id": 1,
-//                 "model_name": "Intel Xeon E5-2678 v3",
-//                 "cores_num": 12,
-//                 "percent": 45.7,
-//                 "updated_at": "2023-10-10T12:34:56Z"
-//             }
-//         },
-//         {
-//             "time": "2023-10-10T12:35:56Z",
-//             "data": {
-//                 "id": 1,
-//                 "model_name": "Intel Xeon E5-2678 v3",
-//                 "cores_num": 12,
-//                 "percent": 50.2,
-//                 "updated_at": "2023-10-10T12:35:56Z"
-//             }
-//         }
-//     ]
-// }
+// [
+//   {
+//     "data": [
+//       {
+//         "id": 0,
+//         "percent": 25.5,
+//         "cores_num": 6,
+//         "model_name": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+//       },
+//       {
+//         "id": 0,
+//         "percent": 25.5,
+//         "cores_num": 6,
+//         "model_name": "Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz"
+//       }
+//     ],
+//     "time": "2025-03-11T13:13:30Z"
+//   },
+//   ……
+// ]
 
 var DB *gorm.DB
+
+var CTX = context.Background()
+var RDB *redis.Client
+
+func InitRedis() error {
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisPassword := os.Getenv("REDIS_PASSWORD")
+	redisDBstr := os.Getenv("REDIS_DB")
+	redisDB, err := strconv.Atoi(redisDBstr)
+	if err != nil {
+		log.Fatalf("Failed to parse Redis DB number: %v", err)
+		return err
+	}
+
+	if redisAddr == "" {
+		log.Fatal("Redis configuration is missing")
+		return fmt.Errorf("Redis configuration is missing")
+	}
+
+	RDB = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,     // Redis地址
+		Password: redisPassword, // 无密码
+		DB:       redisDB,       // 使用默认DB
+	})
+
+	// 测试连接
+	_, err = RDB.Ping(CTX).Result()
+	if err != nil {
+		log.Fatalf("Could not connect to Redis: %v", err)
+		return err
+	}
+	return nil
+}
 
 // ConnectDatabase 连接到数据库
 func ConnectDatabase() error {
@@ -179,7 +226,7 @@ func InitDBData() error {
 	result := tx.Where("name=?", "root").First(&user) // 查找用户名为root的用户
 
 	if result.Error == nil {
-		log.Printf("User already exists") // 用户已存在
+		log.Printf("Root already exists") // 用户已存在
 		tx.Commit()                       // 提交事务
 		return nil
 	} else if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -202,26 +249,33 @@ func InitDBData() error {
 	}
 	fmt.Println("2---------------")
 
+	// 插入公司数据
+	if err := insertCompanies(tx); err != nil {
+		tx.Rollback() // 回滚事务
+		return err    // 返回插入用户时的错误
+	}
+	fmt.Println("3---------------")
+
 	// 插入 host_info 数据
 	if err := insertHostInfo(tx); err != nil {
 		tx.Rollback() // 回滚事务
 		return err    // 返回插入主机信息时的错误
 	}
-	fmt.Println("3---------------")
+	fmt.Println("4---------------")
 
 	// 插入 system_info 数据
 	if err := insertSystemInfo(tx); err != nil {
 		tx.Rollback() // 回滚事务
 		return err    // 返回插入系统信息时的错误
 	}
-	fmt.Println("4---------------")
-	
+	fmt.Println("5---------------")
+
 	// 插入 hostandtoken 数据
 	if err := insertHostAndToken(tx); err != nil {
 		tx.Rollback() // 回滚事务
 		return err    // 返回插入 token 信息时的错误
 	}
-	fmt.Println("5---------------")
+	fmt.Println("6---------------")
 
 	if err := tx.Commit().Error; err != nil {
 		return err // 返回提交事务时的错误
@@ -257,7 +311,6 @@ func insertRoles(tx *gorm.DB) error {
 	return scanner.Err() // 返回扫描器的错误（如果有）
 }
 
-
 // insertUsers 函数从 users.txt 文件中读取用户数据
 func insertUsers(tx *gorm.DB) error {
 	file, err := os.Open("asset/example/users.txt")
@@ -269,17 +322,22 @@ func insertUsers(tx *gorm.DB) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
 		parts := strings.Split(line, ",")
-		if len(parts) < 4 {
+		if len(parts) < 5 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
-
 		name := parts[0]
 		email := parts[1]
 		password := parts[2]
 		roleID := parts[3]
+		companyID := parts[4]
 
-		if err := tx.Exec("INSERT INTO users (name, email, password, role_id) VALUES (?, ?, ?, ?)", name, email, password, roleID).Error; err != nil {
+		if err := tx.Exec("INSERT INTO users (name, email, password, role_id, company_id) VALUES (?, ?, ?, ?, ?)", name, email, password, roleID, companyID).Error; err != nil {
 			return fmt.Errorf("failed to insert user %s: %w", name, err)
 		}
 	}
@@ -297,19 +355,58 @@ func insertHostInfo(tx *gorm.DB) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
 		parts := strings.Split(line, ",")
-		if len(parts) < 5 {
+		if len(parts) < 6 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
 
 		userName := parts[0]
 		hostname := parts[1]
-		os := parts[2]
-		platform := parts[3]
-		kernelArch := parts[4]
+		companyId := parts[2]
+		os := parts[3]
+		platform := parts[4]
+		kernelArch := parts[5]
 
-		if err := tx.Exec("INSERT INTO host_info (user_name, host_name, os, platform, kernel_arch) VALUES (?, ?, ?, ?, ?)", userName, hostname, os, platform, kernelArch).Error; err != nil {
+		if err := tx.Exec("INSERT INTO host_info (user_name, host_name, company_id, os, platform, kernel_arch) VALUES (?, ?, ?, ?, ?, ?)", userName, hostname, companyId, os, platform, kernelArch).Error; err != nil {
 			return fmt.Errorf("failed to insert host_info for %s: %w", hostname, err)
+		}
+	}
+	return scanner.Err()
+}
+
+// insertUsers 函数从 users.txt 文件中读取用户数据
+func insertCompanies(tx *gorm.DB) error {
+	file, err := os.Open("asset/example/companies.txt")
+	if err != nil {
+		return fmt.Errorf("failed to open companies file: %w", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
+		parts := strings.Split(line, ",")
+		if len(parts) < 5 {
+			return fmt.Errorf("invalid line format: %s", line)
+		}
+
+		name := parts[0]
+		memberNum := parts[1]
+		systemNum := parts[2]
+		admin_id := parts[3]
+		description := parts[4]
+		if err := tx.Exec("INSERT INTO companies (name, memberNum, systemNum, admin_id, description) VALUES (?, ?, ?, ?, ?)", name, memberNum, systemNum, admin_id, description).Error; err != nil {
+			return fmt.Errorf("failed to insert user %s: %w", name, err)
 		}
 	}
 	return scanner.Err()
@@ -317,21 +414,21 @@ func insertHostInfo(tx *gorm.DB) error {
 
 // insertSystemInfo 函数从 system_info.txt 文件中读取系统信息
 func insertSystemInfo(tx *gorm.DB) error {
-    file, err := os.Open("asset/example/system_info.txt")
-    if err != nil {
-        return fmt.Errorf("failed to open system_info file: %w", err)
-    }
-    defer file.Close()
+	file, err := os.Open("asset/example/system_info.txt")
+	if err != nil {
+		return fmt.Errorf("failed to open system_info file: %w", err)
+	}
+	defer file.Close()
 
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        line := scanner.Text()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
 		// 检查是否以 "//" 开头
 		if strings.HasPrefix(line, "//") {
 			fmt.Println("Encountered a comment line, exiting the loop.")
 			break // 退出循环
 		}
-        // fmt.Println("Read line:", line) // 输出读取的行（调试用）
+		// fmt.Println("Read line:", line) // 输出读取的行（调试用）
 
 		parts := strings.Split(line, ",,")
 		// fmt.Println()
@@ -340,12 +437,12 @@ func insertSystemInfo(tx *gorm.DB) error {
 		if len(parts) < 6 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
-        hostName := parts[0]
-        hostInfoID := parts[1]
-        cpuInfo := parts[2]
-        memoryInfo := parts[3]
-        processInfo := parts[4]
-        networkInfo := parts[5]
+		hostName := parts[0]
+		hostInfoID := parts[1]
+		cpuInfo := parts[2]
+		memoryInfo := parts[3]
+		processInfo := parts[4]
+		networkInfo := parts[5]
 		// fmt.Println("hostName:", hostName)
 		// fmt.Println("hostInfoID:", hostInfoID)
 		// fmt.Println("cpuInfo:", cpuInfo)
@@ -353,20 +450,20 @@ func insertSystemInfo(tx *gorm.DB) error {
 		// fmt.Println("processInfo:", processInfo)
 		// fmt.Println("networkInfo:", networkInfo)
 
-        // 验证每个 JSON 字符串的有效性
-        if !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
-            return fmt.Errorf("invalid JSON data for host %s", hostName)
-        }
+		// 验证每个 JSON 字符串的有效性
+		if !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
+			return fmt.Errorf("invalid JSON data for host %s", hostName)
+		}
 
-        // 插入数据库（注意：这里假设数据库表 system_info 的对应字段已经设置为接受 jsonb 类型）
-        if err := tx.Exec(
-            "INSERT INTO system_info (host_name, host_info_id, cpu_info, memory_info, process_info, network_info) VALUES (?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)",
-            hostName, hostInfoID, cpuInfo, memoryInfo, processInfo, networkInfo,
-        ).Error; err != nil {
-            return fmt.Errorf("failed to insert system info for host %s: %w", hostName, err)
-        }
-    }
-    return scanner.Err() // 返回读取文件的错误（如果有）
+		// 插入数据库（注意：这里假设数据库表 system_info 的对应字段已经设置为接受 jsonb 类型）
+		if err := tx.Exec(
+			"INSERT INTO system_info (host_name, host_info_id, cpu_info, memory_info, process_info, network_info) VALUES (?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb)",
+			hostName, hostInfoID, cpuInfo, memoryInfo, processInfo, networkInfo,
+		).Error; err != nil {
+			return fmt.Errorf("failed to insert system info for host %s: %w", hostName, err)
+		}
+	}
+	return scanner.Err() // 返回读取文件的错误（如果有）
 }
 
 // insertHostAndToken 函数从 hostandtoken.txt 文件中读取 token 数据
@@ -380,6 +477,11 @@ func insertHostAndToken(tx *gorm.DB) error {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
 		parts := strings.Split(line, ",")
 		if len(parts) < 3 {
 			return fmt.Errorf("invalid line format: %s", line)
@@ -415,6 +517,7 @@ func insertHostAndToken(tx *gorm.DB) error {
 // 	used NUMERIC(10,2) NOT NULL,
 // 	free NUMERIC(10,2) NOT NULL,
 // 	user_percent NUMERIC(5,2) NOT NULL,
+// 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 // 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 // );
 

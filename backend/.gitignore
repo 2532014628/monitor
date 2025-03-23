@@ -17,6 +17,8 @@ Thumbs.db
 __pycache__/
 
 # 忽略构建和编译输出
+.idea/
+.vscode/
 dist/
 build/
 out/
@@ -84,7 +86,7 @@ Dockerfile.*
 logs/
 
 # 忽略配置文件
-config.json
+config.jsonya
 .env
 *.env
 *.env.local
@@ -123,7 +125,6 @@ coverage/
 *.lock
 
 # 忽略其他特定文件
-config/DBconfig/DBconfig.yaml
 *.md5
 *.sha1
 *.sha256
@@ -152,8 +153,6 @@ config/DBconfig/DBconfig.yaml
 *.pfx
 *.der
 
-backend/text-to-picture/czh_demo
-czh_demo/
-# 忽略生成结果
-/assets/examples/images/*.png
-
+# 忽略测试目录
+oss_test/
+tdengine_test/

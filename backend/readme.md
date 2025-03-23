@@ -48,6 +48,7 @@
 - **URL**: `/agent/list`
 - **Method**: `GET`
 - **Content-Type**: `application/json`
+- **Authorization**: `your_jwt_token`
 
 ## 请求参数
 | 参数名 | 类型   | 必填 | 说明                                                                 |
@@ -62,7 +63,7 @@
 [ 
   {
     "id": 2, 
-    "hostname": "my-host", 
+    "host_name": "my-host", 
     "os": "Linux", 
     "platform": "Ubuntu 20.04", 
     "kernel_arch": "x86_64", 
@@ -71,7 +72,7 @@
   }, 
   { 
     "id": 3, 
-    "hostname": "web-server", 
+    "host_name": "web-server", 
     "os": "Linux", 
     "platform": "CentOS 7", 
     "kernel_arch": "x86_64", 
@@ -80,7 +81,7 @@
   }, 
   {
     "id": 4, 
-    "hostname": "db-server", 
+    "host_name": "db-server", 
     "os": "Linux", 
     "platform": "Debian 10", 
     "kernel_arch": "x86_64", 
@@ -89,7 +90,7 @@
   }, 
   { 
     "id": 5, 
-    "hostname": "dev-machine", 
+    "host_name": "dev-machine", 
     "os": "Windows", 
     "platform": "Windows 10", 
     "kernel_arch": "x86_64", 
@@ -98,7 +99,7 @@
   }, 
   { 
     "id": 6, 
-    "hostname": "test-server", 
+    "host_name": "test-server", 
     "os": "Linux", 
     "platform": "Fedora 33", 
     "kernel_arch": "x86_64", 
@@ -111,7 +112,7 @@
 | 字段名               | 类型   | 说明                     |
 |----------------------|--------|------------------------|
 | id                   | int    | 主机唯一标识             |
-| hostname             | string | 主机名                   |
+| host_name             | string | 主机名                   |
 | os                   | string | 操作系统                 |
 | platform             | string | 操作系统版本             |
 | kernel_arch          | string | 内核架构                 |
@@ -137,7 +138,7 @@
 ### URL 参数
 | 参数名     | 类型   | 必填 | 说明         |
 |------------|--------|------|--------------|
-| host_name  | string | 是   | 主机名       |
+| hostname  | string | 是   | 主机名       |
 
 ### Query 参数
 | 参数名 | 类型   | 必填 | 说明                                                                 |
@@ -168,7 +169,7 @@
   "host": 
   {
     "host_info_created_at": "2025-03-10T18:17:16.189247Z", 
-    "hostname": "my-host", 
+    "host_name": "my-host", 
     "id": 2, 
     "kernel_arch": "x86_64", 
     "os": "Linux", 
@@ -231,7 +232,7 @@
 | 字段名               | 类型   | 说明                     |
 |----------------------|--------|------------------------|
 | host_info_created_at | string | 主机信息创建时间         |
-| hostname             | string | 主机名                   |
+| host_name             | string | 主机名                   |
 | id                   | int    | 主机唯一标识             |
 | kernel_arch          | string | 内核架构                 |
 | os                   | string | 操作系统                 |

@@ -1,6 +1,7 @@
-root,root@example.com,123456,1
-user1,user1@qq.com,123456,2
-user2,user2@qq.com,123456,2
-user3,user3@qq.com,123456,2
-user4,user4@qq.com,123456,2
-user5,user5@qq.com,123456,2
+root,root@example.com,123456,2,0
+user1,user1@qq.com,123456,1,1
+user2,user2@qq.com,123456,0,1
+user3,user3@qq.com,123456,0,1
+user4,user4@qq.com,123456,0,1
+user5,user5@qq.com,123456,0,1
+// 用户名，邮箱，密码，role_id，company_id

@@ -1,11 +1,12 @@
 package config
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"path/filepath"
 	"runtime"
+
+	"gopkg.in/yaml.v2"
 )
 
 // DBConfig 用于保存数据库配置
@@ -17,9 +18,36 @@ type DBConfig struct {
 	Password string `yaml:"password"`
 }
 
-// Config 用于保存所有配置项，这里只包括数据库配置
+type OSSConfig struct {
+	OSS_REGION            string `yaml:"OSS_REGION"`
+	OSS_ACCESS_KEY_ID     string `yaml:"OSS_ACCESS_KEY_ID"`
+	OSS_ACCESS_KEY_SECRET string `yaml:"OSS_ACCESS_KEY_SECRET"`
+	OSS_BUCKET            string `yaml:"OSS_BUCKET"`
+}
+
+type RedisConfig struct {
+	Addr     string `yaml:"redis_addr"`
+	Password string `yaml:"redis_password"`
+	DB       string `yaml:"redis_db"`
+}
+
+type EMAILConfig struct {
+	Name     string `yaml:"email_name"`
+	Password string `yaml:"email_password"`
+	Url      string `yaml:"base_url"`
+}
+type SMTPServerConfig struct {
+	Host string `yaml:"SMTPServer_host"`
+	Port string `yaml:"SMTPServer_port"`
+}
+
+// Config 用于保存所有配置项
 type Config struct {
-	DB DBConfig `yaml:"db"`
+	DB         DBConfig         `yaml:"db"`
+	OSS        OSSConfig        `yaml:"oss"`
+	Redis      RedisConfig      `yaml:"redis"`
+	Email      EMAILConfig      `yaml:"email"`
+	SMTPServer SMTPServerConfig `yaml:"smtp_server"`
 }
 
 // getDBConfigPath 获取数据库配置文件的路径

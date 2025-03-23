@@ -1,8 +1,8 @@
-root,root1,Linux,Ubuntu 20.04,x86_64
-root,root2,Linux,Centos Stream 9,x86_64
-root,root3,Windows,x86_64,x86_64
-user1,host1,Linux,Ubuntu 20.04,x86_64
-user2,host2,Linux,Centos Stream 9,x86_64
-user3,host3,Windows,x86_64,x86_64
-user4,host4,Linux,Ubuntu,x86_64
-user5,host5,Linux,Centos 7,x86_64
+root,root1,0,Linux,Ubuntu 20.04,x86_64
+root,root2,0,Linux,CentOS Stream 9,x86_64
+root,root3,0,Linux,CentOS 6,x86_64
+user1,host1,1,Linux,Ubuntu 20.04,x86_64
+user2,host2,1,Linux,CentOS Stream 9,x86_64
+user3,host3,1,Linux,Ubuntu 24.04,x86_64
+user4,host4,1,Linux,Ubuntu 24.04,x86_64
+user5,host5,1,Linux,CentOS 7,x86_64

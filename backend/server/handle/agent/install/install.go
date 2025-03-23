@@ -2,7 +2,6 @@ package install
 
 import (
 	"cmd/server/model"
-	"cmd/server/model/init"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -33,7 +32,7 @@ func InstallAgent(c *gin.Context) {
 	// 检查数据库中是否存在相同的 host_name
 	var exists bool
 	query := `SELECT EXISTS (SELECT 1 FROM host_info WHERE host_name = $1)`
-	err = init.DB.QueryRow(query, agentInfo.Host_Name).Scan(&exists)
+	err := model.DB.QueryRow(query, agentInfo.Host_Name).Scan(&exists)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to check host_name in database"})
 		return
@@ -54,7 +53,7 @@ func InstallAgent(c *gin.Context) {
 	agentInfo.Token = token
 
 	// 存储host_name和token到数据库
-	err = model.InsertHostandToken(db, agentInfo.Host_Name, agentInfo.Token)
+	err = model.InsertHostandToken(model.DB, agentInfo.Host_Name, agentInfo.Token)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert host info into database"})
 		return
