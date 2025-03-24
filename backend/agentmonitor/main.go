@@ -1,9 +1,11 @@
 package main
 
 import (
+	"cmd/agentmonitor/configs"
 	"cmd/agentmonitor/data"
 	"flag"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -16,14 +18,18 @@ func main() {
 
 	// 解析命令行参数
 	flag.Parse()
-
+	config, err := configs.LoadConfig("/root/go-work/modbus/config/config.yaml")
+	if err != nil {
+		log.Fatalf("failed to open config file:%v", err)
+		return
+	}
 	// 定义服务器端点的URL
-	serverURL := "http://192.168.51.28:8080/agent/system_info" // 你的服务器URL
+	serverURL := fmt.Sprintf("http://%s:%s/agent/system_info", config.Url, config.Port) // 你的服务器URL
 
 	//创建调度器
 	s := gocron.NewScheduler(time.UTC)
 	// 每分钟执行一次任务
-	s.Every(1).Minute().Do(func() {
+	s.Every(config.Second).Second().Do(func() {
 		// 收集监控数据
 		datas, err := data.CollectMonitorData(*hostName, *token)
 		if err != nil {
