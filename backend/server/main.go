@@ -86,6 +86,10 @@ func main() {
 	if err := db.InitDBData(); err != nil {
 		log.Fatalf("Failed to initialize data: %v", err)
 	}
+	//初始化TDengine
+	if err := db.InitTDengine(); err != nil {
+		log.Fatalf("Failed to initialize TDengine: %v", err)
+	}
 	// 初始化redis
 	// if err := db.InitRedis(); err!= nil {
 	// 	log.Fatalf("Failed to connect to redis: %v", err)

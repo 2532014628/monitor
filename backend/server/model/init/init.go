@@ -11,7 +11,7 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"os/signal"
+	//"os/signal"
 
 	//"regexp"
 	"strings"
@@ -238,10 +238,6 @@ func InitDB() error {
 		return err // 返回提交事务时的错误
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		//return err // 返回提交事务时的错误
-	}
-
 	//初始化TDengine数据库
 	if TDengineDB == nil {
 		return fmt.Errorf("TDengine database connection is not initialized") // 检查数据库连接是否已初始化
@@ -332,7 +328,20 @@ func InitDBData() error {
 	}
 	fmt.Println("5---------------")
 
-	// 设置信号处理
+	if err := tx.Commit().Error; err != nil {
+		return err // 返回提交事务时的错误
+	}
+
+	return nil
+}
+
+//初始化TDengine数据
+func InitTDengine() error {
+	
+	if TDengineDB == nil {
+		return fmt.Errorf("TDengine database connection is not initialized")
+	}
+/* 	// 设置信号处理
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, os.Kill)
 	go func() {
@@ -340,20 +349,13 @@ func InitDBData() error {
 		fmt.Println("Received signal, closing database connection...")
 		TDengineDB.Close()
 		os.Exit(1)
-	}()
+	}() */
 
-	if TDengineDB == nil {
-		return fmt.Errorf("TDengine database connection is not initialized")
-	}
 	//插入system_info子表数据
 	if err := insertSystemInfo(TDengineDB); err != nil {
 		return err
 	}
-
-	if err := tx.Commit().Error; err != nil {
-		return err // 返回提交事务时的错误
-	}
-
+	fmt.Print("initTDengine---------------")
 	return nil
 }
 
@@ -502,12 +504,6 @@ func insertSystemInfo(t *sql.DB) error {
 			break // 退出循环
 		}
 		// fmt.Println("Read line:", line) // 输出读取的行（调试用）
-
-		// 检查是否以空格开头
-		if strings.HasPrefix(line, " ") {
-			fmt.Println("Encountered a comment line, skipping.")
-			break
-		}
 
 		parts := strings.Split(line, ",,")
 		// fmt.Println()
