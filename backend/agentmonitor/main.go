@@ -18,7 +18,7 @@ func main() {
 
 	// 解析命令行参数
 	flag.Parse()
-	config, err := configs.LoadConfig("/root/go-work/modbus/config/config.yaml")
+	config, err := configs.LoadConfig("./config/config.yaml")
 	if err != nil {
 		log.Fatalf("failed to open config file:%v", err)
 		return
