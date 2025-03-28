@@ -22,8 +22,8 @@ import (
 )
 
 func main() {
-	go monitor.CheckServerStatus() //读取DBConfig.yaml文件
-	go monitor.CheckServerStatus() //读取DBConfig.yaml文件
+	go monitor.CheckServerStatus()
+	//读取DBConfig.yaml文件
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("加载配置失败: %v", err)
@@ -38,6 +38,12 @@ func main() {
 	os.Setenv("DB_HOST", config.DB.Host)
 	os.Setenv("DB_PORT", config.DB.Port)
 	os.Setenv("DB_NAME", config.DB.Name)
+	//设置TDengine数据库连接的环境变量
+	os.Setenv("TDENGINE_USER", config.TDengine.User)
+	os.Setenv("TDENGINE_PASSWORD", config.TDengine.Password)
+	os.Setenv("TDENGINE_HOST", config.TDengine.Host)
+	os.Setenv("TDENGINE_PORT", config.TDengine.Port)
+	os.Setenv("TDENGINE_NAME", config.TDengine.Name)
 	// OSS服务
 	os.Setenv("OSS_REGION", config.OSS.OSS_REGION)
 	os.Setenv("OSS_ACCESS_KEY_ID", config.OSS.OSS_ACCESS_KEY_ID)
@@ -66,13 +72,23 @@ func main() {
 	if err := db.ConnectDatabase(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
+	//连接TDengine数据库
+	if err := db.ConnectTDengine(); err != nil {
+		log.Fatalf("Failed to connect to TDengine database: %v", err)
+	}
+
 	// 初始化数据库
 	if err := db.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
+
 	// 初始化数据库数据
 	if err := db.InitDBData(); err != nil {
 		log.Fatalf("Failed to initialize data: %v", err)
+	}
+	//初始化TDengine
+	if err := db.InitTDengine(); err != nil {
+		log.Fatalf("Failed to initialize TDengine: %v", err)
 	}
 	// 初始化redis
 	// if err := db.InitRedis(); err!= nil {
@@ -97,10 +113,10 @@ func main() {
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 
 		// 公司管理员操作
-		auth.POST("/addMember", admin.AddMember)	// 添加成员
-		auth.POST("/deleteMembers", admin.DeleteMember)	// 批量删除成员
-		auth.GET("/getCompanyInfo", admin.GetCompanyInfo)	// 公司信息（含成员信息）
-		
+		auth.POST("/addMember", admin.AddMember)          // 添加成员
+		auth.POST("/deleteMembers", admin.DeleteMember)   // 批量删除成员
+		auth.GET("/getCompanyInfo", admin.GetCompanyInfo) // 公司信息（含成员信息）
+
 		// 监控
 		auth.POST("/install", install.InstallAgent)
 		auth.POST("/addSystemInfo", monitor.ReceiveAndStoreSystemMetrics)
