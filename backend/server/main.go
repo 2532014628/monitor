@@ -22,8 +22,8 @@ import (
 )
 
 func main() {
-	go monitor.CheckServerStatus() //读取DBConfig.yaml文件
-	go monitor.CheckServerStatus() //读取DBConfig.yaml文件
+	go monitor.CheckServerStatus()
+	//读取DBConfig.yaml文件
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("加载配置失败: %v", err)
@@ -81,7 +81,7 @@ func main() {
 	if err := db.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	
+
 	// 初始化数据库数据
 	if err := db.InitDBData(); err != nil {
 		log.Fatalf("Failed to initialize data: %v", err)
@@ -113,10 +113,10 @@ func main() {
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 
 		// 公司管理员操作
-		auth.POST("/addMember", admin.AddMember)	// 添加成员
-		auth.POST("/deleteMembers", admin.DeleteMember)	// 批量删除成员
-		auth.GET("/getCompanyInfo", admin.GetCompanyInfo)	// 公司信息（含成员信息）
-		
+		auth.POST("/addMember", admin.AddMember)          // 添加成员
+		auth.POST("/deleteMembers", admin.DeleteMember)   // 批量删除成员
+		auth.GET("/getCompanyInfo", admin.GetCompanyInfo) // 公司信息（含成员信息）
+
 		// 监控
 		auth.POST("/install", install.InstallAgent)
 		auth.POST("/addSystemInfo", monitor.ReceiveAndStoreSystemMetrics)
