@@ -12,7 +12,7 @@ import (
 
 // ListAgent 用于查询所有主机信息
 func ListAgent(c *gin.Context) {
-	db, err := model.InitDB()
+	db, _, err := model.InitDB()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "数据库初始化失败"})
 		return
