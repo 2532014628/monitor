@@ -45,7 +45,7 @@ func GetCompanyInfo(c *gin.Context) {
 			Name        string `json:"name"`
 			Admin       string `json:"admin"`
 			MemberNum   int    `json:"member_num"`
-			ServerNum   int    `json:"server_num"`
+			SystemNum   int    `json:"system_num"`
 			Description string `json:"description"`
 		}
 		Members []struct {
@@ -54,18 +54,18 @@ func GetCompanyInfo(c *gin.Context) {
 		}
 	}{
 		Company: struct {
-			ID          int    `json:"id"`
-			Name        string `json:"name"`
-			Admin       string `json:"admin"`
-			MemberNum   int    `json:"member_num"`
-			ServerNum   int    `json:"server_num"`
-			Description string `json:"description"`
+			ID          	int    `json:"id"`
+			Name        	string `json:"name"`
+			Admin       	string `json:"admin"`
+			MemberNum     	int    `json:"member_num"`
+			SystemNum   	int    `json:"system_num"`
+			Description 	string `json:"description"`
 		}{
 			ID:          company.ID,
 			Name:        company.Name, // 假设字段名是 CompanyName 而不是 Name
 			Admin:       username.(string),
 			MemberNum:   company.MemberNum,
-			ServerNum:   company.ServerNum, // 确保这个字段在 u.Company 中存在
+			SystemNum:   company.SystemNum, // 确保这个字段在 u.Company 中存在
 			Description: company.Description,
 		},
 		Members: []struct {
