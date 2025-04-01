@@ -10,6 +10,7 @@ import (
 	"cmd/server/handle/user/update"
 	"cmd/server/middlewire"
 	"cmd/server/middlewire/cors"
+	"cmd/server/handle/company"
 	db "cmd/server/model/init"
 	"fmt"
 	"log"
@@ -111,6 +112,7 @@ func main() {
 		auth.POST("/updateUserInfo", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
+		auth.POST("/registercompany", company.Register)   //注册公司
 
 		// 公司管理员操作
 		auth.POST("/addMember", admin.AddMember)          // 添加成员

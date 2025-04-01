@@ -15,6 +15,6 @@ type Company struct{
 	Name string `json:"name" gorm:"column:name; not null"`
 	Description string `json:"description" gorm:"column:description; not null"`
 	AdminID int `json:"admin_id" gorm:"column:admin_id; not null"`
-	MemberNum int `json:"member_num" gorm:"column:member_num; default:0"`
-	ServerNum int `json:"server_num" gorm:"column:server_num; default:0"`
+	MemberNum int `json:"membernum" gorm:"column:membernum; default:0"`
+	SystemNum int `json:"systemnum" gorm:"column:systemnum; default:0"`
 }
