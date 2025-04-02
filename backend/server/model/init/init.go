@@ -214,6 +214,13 @@ func ConnectTDengine() error {
 	if err != nil {
 		log.Fatalf("Failed to open connection: %v", err)
 	}
+
+	// 测试连接
+	if err := TDengineDB.Ping(); err != nil {
+		log.Fatalf("Failed to ping TDengine:%v", err)
+		return err
+	}
+
 	return nil
 }
 

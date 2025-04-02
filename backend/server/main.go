@@ -4,15 +4,15 @@ import (
 	"cmd/server/config"
 	"cmd/server/handle/admin"
 	"cmd/server/handle/agent/install"
+	"cmd/server/handle/company"
 	"cmd/server/handle/server/monitor" // 引入 monitor 包
 	"cmd/server/handle/user/info"
 	"cmd/server/handle/user/login"
 	"cmd/server/handle/user/update"
 	"cmd/server/middlewire"
 	"cmd/server/middlewire/cors"
-	"cmd/server/handle/company"
 	db "cmd/server/model/init"
-	"fmt"
+	// "fmt"
 	"log"
 	"os"
 
@@ -30,9 +30,6 @@ func main() {
 		log.Fatalf("加载配置失败: %v", err)
 	}
 
-	fmt.Println("-----------------------")
-
-	fmt.Println("-----------------------")
 	//设置数据库连接的环境变量
 	os.Setenv("DB_USER", config.DB.User)
 	os.Setenv("DB_PASSWORD", config.DB.Password)
@@ -60,12 +57,6 @@ func main() {
 	os.Setenv("REDIS_ADDR", config.Redis.Addr)
 	os.Setenv("REDIS_PASSWORD", config.Redis.Password)
 	os.Setenv("REDIS_DB", config.Redis.DB)
-
-	// fmt.Println(os.Getenv("DB_USER"))
-	// fmt.Println(os.Getenv("DB_PASSWORD"))
-	// fmt.Println(os.Getenv("DB_HOST"))
-	// fmt.Println(os.Getenv("DB_PORT"))
-	// fmt.Println(os.Getenv("DB_NAME"))
 
 	router := gin.Default()
 	router.Use(cors.CORSMiddleware())
@@ -112,9 +103,12 @@ func main() {
 		auth.POST("/updateUserInfo", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
-		auth.POST("/registercompany", company.Register)   //注册公司
+
+		// 用户操作
+		auth.POST("/joinCompany", company.JoinCompany) // 加入公司
 
 		// 公司管理员操作
+		auth.POST("/registercompany", company.Register)   //注册公司
 		auth.POST("/addMember", admin.AddMember)          // 添加成员
 		auth.POST("/deleteMembers", admin.DeleteMember)   // 批量删除成员
 		auth.GET("/getCompanyInfo", admin.GetCompanyInfo) // 公司信息（含成员信息）
