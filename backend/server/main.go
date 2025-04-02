@@ -12,6 +12,7 @@ import (
 	"cmd/server/middlewire"
 	"cmd/server/middlewire/cors"
 	db "cmd/server/model/init"
+
 	// "fmt"
 	"log"
 	"os"
@@ -105,7 +106,7 @@ func main() {
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 
 		// 用户操作
-		auth.POST("/joinCompany", company.JoinCompany) // 加入公司
+		auth.POST("/joincompany", company.JoinCompany) // 加入公司
 
 		// 公司管理员操作
 		auth.POST("/registercompany", company.Register)   //注册公司
