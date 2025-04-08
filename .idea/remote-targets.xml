@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <option name="projectDefaultTargetUuid" value="01f8c169-b45f-4c67-8c11-e49fa338a828" />
+    <targets>
+      <target name="root@120.79.200.209:20024" type="ssh/sftp" uuid="01f8c169-b45f-4c67-8c11-e49fa338a828">
+        <config>
+          <option name="projectRootOnTarget" value="/root/servermanage" />
+          <option name="serverName" value="root@120.79.200.209:20024 password" />
+        </config>
+        <ContributedStateBase type="GoLanguageRuntime">
+          <config>
+            <option name="goPath" value="/go/src" />
+            <option name="goRoot" value="/usr/local/go/bin/go" />
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>

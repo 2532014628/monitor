@@ -18,6 +18,15 @@ type DBConfig struct {
 	Password string `yaml:"password"`
 }
 
+//TDengineConfig 用于保存TDengine数据库配置
+type TDengineConfig struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Name     string `yaml:"name"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+}
+
 type OSSConfig struct {
 	OSS_REGION            string `yaml:"OSS_REGION"`
 	OSS_ACCESS_KEY_ID     string `yaml:"OSS_ACCESS_KEY_ID"`
@@ -44,6 +53,7 @@ type SMTPServerConfig struct {
 // Config 用于保存所有配置项
 type Config struct {
 	DB         DBConfig         `yaml:"db"`
+	TDengine   TDengineConfig   `yaml:"tdengine"`
 	OSS        OSSConfig        `yaml:"oss"`
 	Redis      RedisConfig      `yaml:"redis"`
 	Email      EMAILConfig      `yaml:"email"`

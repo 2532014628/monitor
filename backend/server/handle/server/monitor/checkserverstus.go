@@ -8,7 +8,7 @@ import (
 
 // 定时检查服务器状态
 func CheckServerStatus() {
-	db, err := model.InitDB()
+	db, _, err := model.InitDB()
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}

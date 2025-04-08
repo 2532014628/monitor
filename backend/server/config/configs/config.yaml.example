@@ -5,6 +5,13 @@ db: # 数据库配置
   user: username    # 数据库用户名
   password: password # 数据库密码
 
+tdengine: #TDengine数据库配置
+  host: localhost # tdengine服务器端地址
+  port: "6030"   # 数据库端口
+  name: database # 数据库名
+  user: username    # 数据库用户名
+  password: password # 数据库密码
+
 oss: #aliyun oss 配置
   OSS_REGION: oss-cn-shenzhen # oss区域
   OSS_ACCESS_KEY_ID: # oss key
