@@ -108,11 +108,13 @@ func main() {
 		// 用户操作
 		auth.POST("/joincompany", company.JoinCompany) // 加入公司
 
-		// 公司管理员操作
-		auth.POST("/registercompany", company.Register)   //注册公司
-		auth.POST("/addMember", admin.AddMember)          // 添加成员
-		auth.POST("/deleteMembers", admin.DeleteMember)   // 批量删除成员
-		auth.GET("/getCompanyInfo", admin.GetCompanyInfo) // 公司信息（含成员信息）
+		// 系统/公司管理员操作
+		auth.POST("/registercompany", company.Register)       //注册公司
+		auth.POST("/addMember", admin.AddMember)              // 添加成员
+		auth.POST("/deleteMembers", admin.DeleteMember)       // 批量删除成员
+		auth.GET("/getmemberinfo", admin.GetMemberInfo)       // 获取公司成员信息
+		auth.GET("/get-company-info", admin.GetCompanyInfo)   // 指定公司的信息（含成员信息）
+		auth.GET("/get-company-list", company.GetCompanyList) // 公司列表
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)

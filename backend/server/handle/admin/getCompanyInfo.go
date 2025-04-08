@@ -1,40 +1,90 @@
 package admin
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"gorm.io/gorm"
 
 	m_init "cmd/server/model/init"
 	u "cmd/server/model/user"
 )
 
-// 管理员获取当前公司的信息
+func IsRoot(username string) bool {
+	var user u.User
+	if err := m_init.DB.Where("name =?", username).First(&user).Error; err != nil {
+		return false
+	}
+	return user.RoleId == 2
+}
+
+// 获取指定公司的信息
 func GetCompanyInfo(c *gin.Context) {
 	username, _ := c.Get("username")
-	// 判断当前用户是否有管理员权限
-	if !isAdmin(username.(string)) {
-		c.JSON(http.StatusForbidden, gin.H{"message": "非公司管理员，权限不足"})
-		return
-	}
-	// 查询管理员信息
-	var admin u.User
-	if err := m_init.DB.Where("name =?", username.(string)).First(&admin).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询管理员失败"})
-		return
-	}
 
-	// 查询管理员所在公司
 	var company u.Company
-	if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
-		return
+	companyName := c.Query("company-name")
+	if companyName == "" { // 未传递公司名，默认当前登录用户（管理员）所在的公司
+		// 判断当前用户是否有管理员权限
+		if !IsAdmin(username.(string)) && !IsRoot(username.(string)) {
+			c.JSON(http.StatusForbidden, gin.H{"message": "非管理员，权限不足"})
+			return
+		}
+		// 查询管理员信息
+		var admin u.User
+		if err := m_init.DB.Where("name =?", username.(string)).First(&admin).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询管理员失败"})
+			return
+		}
+
+		// 查询管理员所在公司
+		if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusUnauthorized, gin.H{"message": "公司不存在"})
+				return	
+			}else{
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
+				return
+			}
+		}
+
+	} else { // 传递公司名，判断当前用户是否为root或指定公司的管理员
+		if !IsRoot(username.(string)) {
+			// 非系统管理员，判断是否为指定公司的管理员
+			if !IsAdmin(username.(string)) {
+				c.JSON(http.StatusForbidden, gin.H{"message": "非系统管理员或公司管理员，权限不足"})
+				return
+			}
+			// 查询管理员信息
+			var admin u.User
+			if err := m_init.DB.Where("name =?", username.(string)).First(&admin).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询管理员失败"})
+				return
+			}
+
+			// 查询管理员所在公司
+			if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
+				return
+			}
+			// 判断是否为指定公司的管理员
+			if company.ID != admin.CompanyId {
+				c.JSON(http.StatusForbidden, gin.H{"message": "系统管理员或指定公司的管理员，权限不足"})
+				return
+			}
+		}
+		// 系统管理员，查询指定公司信息
+		if err := m_init.DB.Where("name = ?", companyName).First(&company).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据查询公司失败"})
+			return
+		}
 	}
 
 	// 查询公司成员
 	var members []u.User
-	if err := m_init.DB.Where("company_id =?", admin.CompanyId).Find(&members).Error; err != nil {
+	if err := m_init.DB.Where("company_id =?", company.ID).Find(&members).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司成员失败"})
 		return
 	}
@@ -51,15 +101,16 @@ func GetCompanyInfo(c *gin.Context) {
 		Members []struct {
 			Username string `json:"username"`
 			Email    string `json:"email"`
+			RoleId   int    `json:"role_id"`
 		}
 	}{
 		Company: struct {
-			ID          	int    `json:"id"`
-			Name        	string `json:"name"`
-			Admin       	string `json:"admin"`
-			MemberNum     	int    `json:"member_num"`
-			SystemNum   	int    `json:"system_num"`
-			Description 	string `json:"description"`
+			ID          int    `json:"id"`
+			Name        string `json:"name"`
+			Admin       string `json:"admin"`
+			MemberNum   int    `json:"member_num"`
+			SystemNum   int    `json:"system_num"`
+			Description string `json:"description"`
 		}{
 			ID:          company.ID,
 			Name:        company.Name, // 假设字段名是 CompanyName 而不是 Name
@@ -71,6 +122,7 @@ func GetCompanyInfo(c *gin.Context) {
 		Members: []struct {
 			Username string `json:"username"`
 			Email    string `json:"email"`
+			RoleId   int    `json:"role_id"`
 		}{},
 	}
 
@@ -79,9 +131,11 @@ func GetCompanyInfo(c *gin.Context) {
 		response.Members = append(response.Members, struct {
 			Username string `json:"username"`
 			Email    string `json:"email"`
+			RoleId   int    `json:"role_id"`
 		}{
 			Username: member.Name,
 			Email:    member.Email,
+			RoleId:   member.RoleId,
 		})
 	}
 
