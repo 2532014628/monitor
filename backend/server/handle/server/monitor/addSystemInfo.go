@@ -1,10 +1,10 @@
 package monitor
 
 import (
-	"cmd/server/model"
+	"backend/server/model"
 	"database/sql"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,11 +14,11 @@ import (
 // RequestData 用于接收系统监控数据的请求体
 // @Description RequestData 包含所有需要收集的系统信息
 type RequestData struct {
-	CPUInfo  []model.CPUInfo   `json:"cpu_info"`  // CPU 信息
-	HostInfo model.HostInfo    `json:"host_info"` // 主机信息
-	MemInfo  model.MemoryInfo  `json:"mem_info"`  // 内存信息
-	ProInfo  model.ProcessInfo `json:"pro_info"`  // 进程信息
-	NetInfo  model.NetworkInfo `json:"net_info"`  // 网络信息
+	CPUInfo  []model.CPUInfo     `json:"cpu_info"`  // CPU 信息
+	HostInfo model.HostInfo      `json:"host_info"` // 主机信息
+	MemInfo  model.MemoryInfo    `json:"mem_info"`  // 内存信息
+	ProInfo  []model.ProcessInfo `json:"pro_info"`  // 进程信息
+	NetInfo  []model.NetworkInfo `json:"net_info"`  // 网络信息
 }
 
 // AddSystemInfo 接收并处理系统监控数据
@@ -35,14 +35,6 @@ type RequestData struct {
 // @Failure 500 {object} map[string]string "数据库操作失败"
 // @Router /monitor [post]
 func ReceiveAndStoreSystemMetrics(c *gin.Context) {
-	// 初始化数据库
-	db, tdengine, err := model.InitDB()
-	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	} else {
-		fmt.Println("Init Successfully")
-	}
-	defer db.Close()
 
 	// 解析请求数据
 	var requestData RequestData
@@ -57,15 +49,15 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 	SELECT token 
 	FROM hostandtoken WHERE host_name = $1` //(SELECT 1 FROM hostandtoken WHERE host_name = $1)
 
-	err = db.QueryRow(querySQL, requestData.HostInfo.Hostname).Scan(&tokens)
-	if err == sql.ErrNoRows {
+	err := model.DB.QueryRow(querySQL, requestData.HostInfo.Hostname).Scan(&tokens)
+	if errors.Is(err, sql.ErrNoRows) {
 		fmt.Println("No matching token.")
 	}
 	if len(tokenh) != 16 {
 		//c.JSON(http.StatusBadRequest, gin.H{"error": "Wrong token length"})
 		//return
 	} else if tokenh != tokens {
-		//c.JSON(http.StatusBadRequest, gin.H{"error": "Unequal string"})
+		//c.JSON(h ttp.StatusBadRequest, gin.H{"error": "Unequal string"})
 		//return
 	}
 
@@ -74,37 +66,16 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
     UPDATE hostandtoken 
     SET last_heartbeat = NOW(), status = 'online' 
     WHERE host_name = $1`
-	_, err = db.Exec(updateSQL, requestData.HostInfo.Hostname)
+	_, err = model.DB.Exec(updateSQL, requestData.HostInfo.Hostname)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update heartbeat and status"})
 		return
 	}
 
-	// 从解析的 token 中获取 username存入数据库
-	// 从上下文中获取用户名
-	Username, exists := c.Get("username")
-	if !exists {
-		log.Printf("未找到用户名")
-		c.JSON(401, gin.H{
-			"code":    401,
-			"success": false,
-			"message": "未找到用户信息",
-		})
-		return
-	}
-	username := Username.(string)
-
 	// 将数据插入数据库
-	// 插入 host_info 表
-	err = model.InsertHostInfo(requestData.HostInfo, username)
-	if err != nil {
-		s := fmt.Sprintf("Failed to insert host info: %s", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": s})
-		return
-	}
 
 	// 插入 hostandtoken 表
-	err = model.InsertHostandToken(db, requestData.HostInfo.Hostname, tokenh)
+	err = model.InsertHostandToken(requestData.HostInfo.Hostname, tokenh)
 	if err != nil {
 		s := fmt.Sprintf("Failed to insert host and token info: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": s})
@@ -112,7 +83,7 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 	}
 
 	// 插入 system_info 表
-	err = model.InsertSystemInfo(db, tdengine,requestData.HostInfo.Hostname,requestData.HostInfo, requestData.CPUInfo, requestData.MemInfo, requestData.ProInfo, requestData.NetInfo)
+	err = model.InsertSystemInfo(requestData.HostInfo.Hostname, requestData.HostInfo, requestData.CPUInfo, requestData.MemInfo, requestData.ProInfo, requestData.NetInfo)
 	if err != nil {
 		s := fmt.Sprintf("Failed to insert system info: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": s})

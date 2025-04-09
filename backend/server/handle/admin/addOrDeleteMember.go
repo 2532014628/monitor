@@ -9,8 +9,8 @@ import (
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 
-	m_init "cmd/server/model/init"
-	u "cmd/server/model/user"
+	m_init "backend/server/model/init"
+	u "backend/server/model/user"
 )
 
 // 管理员权限检查

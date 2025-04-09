@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"cmd/server/model"
+	"backend/server/model"
 	"log"
 	"net/http"
 	"time"
@@ -12,13 +12,6 @@ import (
 
 // ListAgent 用于查询所有主机信息
 func ListAgent(c *gin.Context) {
-	db, _, err := model.InitDB()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "数据库初始化失败"})
-		return
-	}
-	defer db.Close()
-
 	// 从上下文中获取用户名
 	Username, exists := c.Get("username")
 	if !exists {
@@ -61,7 +54,7 @@ func ListAgent(c *gin.Context) {
 		WHERE user_name = $1 AND created_at BETWEEN $2 AND $3
 	`
 
-	rows, err := db.Query(query, username, fromTime, toTime)
+	rows, err := model.DB.Query(query, username, fromTime, toTime)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query host_info", "details": err.Error()})
 		return

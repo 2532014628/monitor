@@ -88,7 +88,7 @@ func GetCpuInfo() ([]CPUInfo, error) {
 
 type HostInfo struct {
 	ID         int       `json:"id"`
-	Hostname   string    `json:"hostname"`
+	Hostname   string    `json:"host_name"`
 	OS         string    `json:"os"`
 	Platform   string    `json:"platform"`
 	KernelArch string    `json:"kernel_arch"`
@@ -117,7 +117,6 @@ type ProcessInfo struct {
 	PID        int       `json:"pid"`
 	CPUPercent float64   `json:"cpu_percent"`
 	MemPercent float32   `json:"mem_percent"`
-	Cmdline    string    `json:"cmdline"`
 	CreatedAt  time.Time `json:"pro_info_created_at"`
 }
 
@@ -141,7 +140,6 @@ func GetProcess() ([]ProcessInfo, error) {
 			continue
 		}
 
-		cmdline, err := p.Cmdline()
 		if err != nil {
 			continue
 		}
@@ -150,7 +148,6 @@ func GetProcess() ([]ProcessInfo, error) {
 			PID:        int(p.Pid),
 			CPUPercent: cpuPercent,
 			MemPercent: memPercent,
-			Cmdline:    cmdline,
 			CreatedAt:  time.Now(),
 		})
 	}

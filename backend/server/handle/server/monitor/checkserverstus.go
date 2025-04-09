@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"cmd/server/model"
+	"backend/server/model"
 	"log"
 	"time"
 )
@@ -13,7 +13,6 @@ func CheckServerStatus() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
-
 	for {
 		time.Sleep(5 * time.Minute)
 
@@ -22,7 +21,7 @@ func CheckServerStatus() {
         UPDATE hostandtoken 
         SET status = 'offline'
         WHERE NOW() - last_heartbeat > INTERVAL '5 minutes' AND status != 'offline'`
-		_, err = db.Exec(query)
+		_, err := db.Exec(query)
 		if err != nil {
 			log.Printf("Failed to update offline status: %v", err)
 		} else {

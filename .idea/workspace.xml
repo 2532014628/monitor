@@ -7,8 +7,23 @@
     <list default="true" id="393d2094-98c3-46db-b50b-5c639f6832a1" name="更改" comment="">
       <change afterPath="$PROJECT_DIR$/frontend/Platform" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/server/docs/red.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/docs/red.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/agentmonitor/data/data.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/agentmonitor/data/data.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/agentmonitor/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/agentmonitor/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/agentmonitor/monitor/monitor.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/agentmonitor/monitor/monitor.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/admin/addOrDeleteMember.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/admin/addOrDeleteMember.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/admin/getCompanyInfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/admin/getCompanyInfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/agent/install/install.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/agent/install/install.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/server/monitor/addSystemInfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/server/monitor/addSystemInfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/server/monitor/checkserverstus.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/server/monitor/checkserverstus.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/server/monitor/getagentinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/server/monitor/getagentinfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/server/monitor/listagent.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/server/monitor/listagent.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/user/info/getusername.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/user/info/getusername.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/user/login/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/user/login/login.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/user/update/update.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/user/update/update.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/model/init/init.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/model/init/init.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/model/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/model/model.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,6 +65,10 @@
     &quot;accountId&quot;: &quot;c52bbe76-bbf1-402e-8960-0aa881df3433&quot;
   }
 }</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -62,25 +81,49 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "DefaultGoTemplateProperty": "Go File",
+    "Go 构建.go build backend/agentmonitor.executor": "Debug",
+    "Go 构建.go build backend/server.executor": "Debug",
     "Go 构建.go build cmd/agentmonitor.executor": "Debug",
     "Go 构建.go build cmd/server.executor": "Run",
-    "Go 构建.servermonitor.executor": "Run",
+    "Go 构建.servermonitor.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "qtest",
+    "git-widget-placeholder": "test",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "D:/goproject/src/gocode/servermanage/backend/server",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.file-colors",
     "ts.external.directory.path": "D:\\golang2024\\GoLand 2024.2.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Go 构建.servermonitor">
+  <component name="RunManager" selected="Go 构建.go build backend/server">
+    <configuration name="go build backend/agentmonitor" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="servermanage" />
+      <target name="@@@LOCAL@@@" />
+      <working_directory value="$PROJECT_DIR$/backend" />
+      <parameters value="-host_name=&quot;wujinhao machine&quot; -token=&quot;f732c36249e2d28a&quot;" />
+      <kind value="PACKAGE" />
+      <package value="backend/agentmonitor" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/backend/agentmonitor/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build backend/server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="servermanage" />
+      <working_directory value="$PROJECT_DIR$/backend/server" />
+      <kind value="PACKAGE" />
+      <package value="backend/server" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/backend/server/main.go" />
+      <option name="build_on_remote_target" value="true" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build cmd/agentmonitor" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="servermanage" />
       <working_directory value="$PROJECT_DIR$/backend" />
@@ -112,6 +155,8 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go 构建.go build backend/server" />
+        <item itemvalue="Go 构建.go build backend/agentmonitor" />
         <item itemvalue="Go 构建.servermonitor" />
         <item itemvalue="Go 构建.go build cmd/agentmonitor" />
       </list>
@@ -159,14 +204,14 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/server/model/model.go</url>
-          <line>349</line>
-          <option name="timeStamp" value="7" />
+          <url>file://$PROJECT_DIR$/backend/server/handle/server/monitor/getagentinfo.go</url>
+          <line>14</line>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/agentmonitor/main.go</url>
-          <line>13</line>
-          <option name="timeStamp" value="8" />
+          <url>file://$PROJECT_DIR$/backend/server/handle/server/monitor/addSystemInfo.go</url>
+          <line>39</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

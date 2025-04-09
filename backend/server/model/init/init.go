@@ -1,8 +1,8 @@
 package init
 
 import (
+	u "backend/server/model/user"
 	"bufio"
-	u "cmd/server/model/user"
 	"context"
 	"encoding/json"
 	"errors"
@@ -16,11 +16,11 @@ import (
 	//"regexp"
 	"strings"
 
+	"database/sql"
 	"github.com/go-redis/redis/v8"
+	_ "github.com/taosdata/driver-go/v3/taosSql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	_ "github.com/taosdata/driver-go/v3/taosSql"
-	"database/sql"
 )
 
 // 属性均用驼峰命名转换后的含_的，表名就不含_。
@@ -191,13 +191,16 @@ func ConnectDatabase() error {
 
 	// 使用gorm打开数据库连接
 	DB, err = gorm.Open(postgres.Open(dsn))
+	sqlDB, _ := DB.DB()
+	sqlDB.SetMaxIdleConns(10) // 默认值2容易导致连接不足
+	sqlDB.SetConnMaxLifetime(time.Hour)
 	if err != nil {
 		return err // 返回连接错误
 	}
 	return nil
 }
 
-//连接TDengine数据库
+// 连接TDengine数据库
 func ConnectTDengine() error {
 	var err error
 
@@ -335,21 +338,21 @@ func InitDBData() error {
 	return nil
 }
 
-//初始化TDengine数据
+// 初始化TDengine数据
 func InitTDengine() error {
-	
+
 	if TDengineDB == nil {
 		return fmt.Errorf("TDengine database connection is not initialized")
 	}
-/* 	// 设置信号处理
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, os.Kill)
-	go func() {
-		<-signals
-		fmt.Println("Received signal, closing database connection...")
-		TDengineDB.Close()
-		os.Exit(1)
-	}() */
+	/* 	// 设置信号处理
+	   	signals := make(chan os.Signal, 1)
+	   	signal.Notify(signals, os.Interrupt, os.Kill)
+	   	go func() {
+	   		<-signals
+	   		fmt.Println("Received signal, closing database connection...")
+	   		TDengineDB.Close()
+	   		os.Exit(1)
+	   	}() */
 
 	//插入system_info子表数据
 	if err := insertSystemInfo(TDengineDB); err != nil {
@@ -526,7 +529,7 @@ func insertSystemInfo(t *sql.DB) error {
 		// fmt.Println("networkInfo:", networkInfo)
 
 		// 验证每个 JSON 字符串的有效性
-		if !isValidJSON(hostInfo)||!isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
+		if !isValidJSON(hostInfo) || !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
 			return fmt.Errorf("invalid JSON data for host %s", hostName)
 		}
 

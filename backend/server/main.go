@@ -1,28 +1,41 @@
 package main
 
 import (
-	"cmd/server/config"
-	"cmd/server/handle/admin"
-	"cmd/server/handle/agent/install"
-	"cmd/server/handle/server/monitor" // 引入 monitor 包
-	"cmd/server/handle/user/info"
-	"cmd/server/handle/user/login"
-	"cmd/server/handle/user/update"
-	"cmd/server/middlewire"
-	"cmd/server/middlewire/cors"
-	db "cmd/server/model/init"
+	"backend/server/config"
+	"backend/server/handle/admin"
+	"backend/server/handle/agent/install"
+	"backend/server/handle/server/monitor" // 引入 monitor 包
+	"backend/server/handle/user/info"
+	"backend/server/handle/user/login"
+	"backend/server/handle/user/update"
+	"backend/server/middlewire"
+	"backend/server/middlewire/cors"
+	db "backend/server/model/init"
 	"fmt"
-	"log"
-	"os"
-
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	go monitor.CheckServerStatus()
+
+	//ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	//defer stop()
+
+	//go func() {
+	//	<-ctx.Done()
+	//	// 执行连接关闭
+	//	if err := model.DB.Close(); err != nil {
+	//		log.Printf("Failed to close database connection: %v", err)
+	//	}
+	//	if err := model.TDengine.Close(); err != nil {
+	//		log.Printf("Failed to close TDengine connection: %v", err)
+	//	}
+	//	os.Exit(0)
+	//}()
 	//读取DBConfig.yaml文件
 	config, err := config.LoadConfig()
 	if err != nil {
@@ -94,7 +107,7 @@ func main() {
 	// if err := db.InitRedis(); err!= nil {
 	// 	log.Fatalf("Failed to connect to redis: %v", err)
 	// }
-
+	go monitor.CheckServerStatus()
 	router.Static("/static", "./static")
 
 	// 注册 Swagger 路由
@@ -119,10 +132,9 @@ func main() {
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)
-		auth.POST("/addSystemInfo", monitor.ReceiveAndStoreSystemMetrics)
 		auth.GET("/list", monitor.ListAgent)
-		router.GET("/monitor/:hostname", monitor.GetAgentInfo)
+		auth.GET("/monitor/:hostname", monitor.GetAgentInfo)
 	}
-
+	router.POST("/agent/addSystem_info", monitor.ReceiveAndStoreSystemMetrics)
 	router.Run("0.0.0.0:8080")
 }

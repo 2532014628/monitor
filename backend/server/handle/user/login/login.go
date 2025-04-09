@@ -1,7 +1,7 @@
 package login
 
 import (
-	"cmd/server/middlewire"
+	"backend/server/middlewire"
 	"errors"
 	"net/http"
 	"regexp"
@@ -12,8 +12,8 @@ import (
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
 
-	m_init "cmd/server/model/init"
-	u "cmd/server/model/user"
+	m_init "backend/server/model/init"
+	u "backend/server/model/user"
 )
 
 // RegisterRequest 定义注册请求的数据结构
@@ -101,13 +101,13 @@ func Register(c *gin.Context) {
 	err = m_init.DB.Where("name =?", input.Company).First(&company).Error
 	if err == nil {
 		companyId = company.ID
-	}else if errors.Is(err, gorm.ErrRecordNotFound) {
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
 		companyId = 0
-	}else{
+	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
-		return	
+		return
 	}
-	
+
 	// 创建用户
 	newUser := u.User{
 		Name:       input.Name,

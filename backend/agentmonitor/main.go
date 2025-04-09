@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cmd/agentmonitor/configs"
-	"cmd/agentmonitor/data"
+	"backend/agentmonitor/configs"
+	"backend/agentmonitor/data"
 	"flag"
 	"fmt"
 	"log"
@@ -13,18 +13,19 @@ import (
 
 func main() {
 	// 定义一个字符串变量，用来接收传入的 host_name 与token参数
-	hostName := flag.String("host_name", "", "The hostname for the agent")
+	hostName := flag.String("hostname", "", "The hostname for the agent")
 	token := flag.String("token", "", "A string of 16 characters")
 
 	// 解析命令行参数
 	flag.Parse()
+	fmt.Printf("hostname:%s,token:%s\n", *hostName, *token)
 	config, err := configs.LoadConfig("./config/config.yaml")
 	if err != nil {
 		log.Fatalf("failed to open config file:%v", err)
 		return
 	}
 	// 定义服务器端点的URL
-	serverURL := fmt.Sprintf("http://%s:%s/agent/system_info", config.Url, config.Port) // 你的服务器URL
+	serverURL := fmt.Sprintf("http://%s:%s/agent/addSystem_info", config.Url, config.Port) // 你的服务器URL
 
 	//创建调度器
 	s := gocron.NewScheduler(time.UTC)
@@ -35,6 +36,7 @@ func main() {
 		if err != nil {
 			fmt.Println("收集数据错误")
 		}
+		fmt.Println(datas.HostInfo.Hostname)
 		// 发送收集到的数据到服务器
 		err = data.SendMonitorData(serverURL, datas)
 		if err != nil {

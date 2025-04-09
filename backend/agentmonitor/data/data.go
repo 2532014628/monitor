@@ -1,8 +1,8 @@
 package data
 
 import (
+	"backend/agentmonitor/monitor"
 	"bytes"
-	"cmd/agentmonitor/monitor"
 	"encoding/json"
 	"fmt"
 	"net/http"

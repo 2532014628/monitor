@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"cmd/server/model"
+	"backend/server/model"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,14 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// GetAgentInfo 用于查询特定主机信息
 func GetAgentInfo(c *gin.Context) {
-	db, _, err := model.InitDB()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "数据库初始化失败"})
-		return
-	}
-	defer db.Close()
 
 	hostname := c.Param("hostname")
 	if len(hostname) == 0 {
@@ -38,7 +31,7 @@ func GetAgentInfo(c *gin.Context) {
 		to = "9999-12-31T23:59:59Z"
 	}
 
-	result, err := model.ReadDB(db, queryType, from, to, hostname)
+	result, err := model.ReadDB(queryType, from, to, hostname)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		log.Printf("error:%f", err)
