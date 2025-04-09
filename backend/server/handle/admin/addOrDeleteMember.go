@@ -14,7 +14,7 @@ import (
 )
 
 // 管理员权限检查
-func isAdmin(username string) bool {
+func IsAdmin(username string) bool {
 	var user u.User
 	if err := m_init.DB.Where("name =?", username).First(&user).Error; err != nil {
 		return false
@@ -36,7 +36,7 @@ func AddMember(c *gin.Context) {
 
 	username, _ := c.Get("username")
 	// 判断当前用户是否有管理员权限
-	if !isAdmin(username.(string)) {
+	if !IsAdmin(username.(string)) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "非公司管理员，权限不足"})
 		return
 	}
@@ -121,7 +121,7 @@ func DeleteMember(c *gin.Context) {
 	}
 	username, _ := c.Get("username")
 	// 判断当前用户是否有管理员权限
-	if !isAdmin(username.(string)) {
+	if !IsAdmin(username.(string)) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "非公司管理员，权限不足"})
 		return
 	}

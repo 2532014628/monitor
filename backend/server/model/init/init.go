@@ -217,6 +217,13 @@ func ConnectTDengine() error {
 	if err != nil {
 		log.Fatalf("Failed to open connection: %v", err)
 	}
+
+	// 测试连接
+	if err := TDengineDB.Ping(); err != nil {
+		log.Fatalf("Failed to ping TDengine:%v", err)
+		return err
+	}
+
 	return nil
 }
 
@@ -277,7 +284,7 @@ func InitDBData() error {
 	}()
 
 	var user u.User
-	result := tx.Where("name=?", "root").First(&user) // 查找用户名为root的用户
+	result := tx.Where("name=?", "ROOT").First(&user) // 查找用户名为root的用户
 
 	if result.Error == nil {
 		log.Printf("Root already exists") // 用户已存在

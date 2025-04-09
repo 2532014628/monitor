@@ -4,6 +4,7 @@ import (
 	"backend/server/config"
 	"backend/server/handle/admin"
 	"backend/server/handle/agent/install"
+	"backend/server/handle/company"
 	"backend/server/handle/server/monitor" // 引入 monitor 包
 	"backend/server/handle/user/info"
 	"backend/server/handle/user/login"
@@ -11,7 +12,7 @@ import (
 	"backend/server/middlewire"
 	"backend/server/middlewire/cors"
 	db "backend/server/model/init"
-	"fmt"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
@@ -42,9 +43,6 @@ func main() {
 		log.Fatalf("加载配置失败: %v", err)
 	}
 
-	fmt.Println("-----------------------")
-
-	fmt.Println("-----------------------")
 	//设置数据库连接的环境变量
 	os.Setenv("DB_USER", config.DB.User)
 	os.Setenv("DB_PASSWORD", config.DB.Password)
@@ -72,12 +70,6 @@ func main() {
 	os.Setenv("REDIS_ADDR", config.Redis.Addr)
 	os.Setenv("REDIS_PASSWORD", config.Redis.Password)
 	os.Setenv("REDIS_DB", config.Redis.DB)
-
-	// fmt.Println(os.Getenv("DB_USER"))
-	// fmt.Println(os.Getenv("DB_PASSWORD"))
-	// fmt.Println(os.Getenv("DB_HOST"))
-	// fmt.Println(os.Getenv("DB_PORT"))
-	// fmt.Println(os.Getenv("DB_NAME"))
 
 	router := gin.Default()
 	router.Use(cors.CORSMiddleware())
@@ -125,10 +117,16 @@ func main() {
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 
-		// 公司管理员操作
-		auth.POST("/addMember", admin.AddMember)          // 添加成员
-		auth.POST("/deleteMembers", admin.DeleteMember)   // 批量删除成员
-		auth.GET("/getCompanyInfo", admin.GetCompanyInfo) // 公司信息（含成员信息）
+		// 用户操作
+		auth.POST("/joincompany", company.JoinCompany) // 加入公司
+
+		// 系统/公司管理员操作
+		auth.POST("/registercompany", company.Register)       //注册公司
+		auth.POST("/addMember", admin.AddMember)              // 添加成员
+		auth.POST("/deleteMembers", admin.DeleteMember)       // 批量删除成员
+		auth.GET("/getmemberinfo", admin.GetMemberInfo)       // 获取公司成员信息
+		auth.GET("/get-company-info", admin.GetCompanyInfo)   // 指定公司的信息（含成员信息）
+		auth.GET("/get-company-list", company.GetCompanyList) // 公司列表
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)
