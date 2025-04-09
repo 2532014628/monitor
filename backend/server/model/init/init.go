@@ -281,7 +281,7 @@ func InitDBData() error {
 	}()
 
 	var user u.User
-	result := tx.Where("name=?", "root").First(&user) // 查找用户名为root的用户
+	result := tx.Where("name=?", "ROOT").First(&user) // 查找用户名为root的用户
 
 	if result.Error == nil {
 		log.Printf("Root already exists") // 用户已存在

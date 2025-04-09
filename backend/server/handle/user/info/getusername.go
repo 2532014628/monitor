@@ -42,7 +42,7 @@ func GetAllUserInfo(c *gin.Context) {
 		})
 	}
 
-	if username.(string) != "root" {
+	if username.(string) != "ROOT" {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "用户没有权限"})
 		return
 	}

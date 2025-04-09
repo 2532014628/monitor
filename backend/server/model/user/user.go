@@ -5,7 +5,7 @@ type User struct {
 	Name       string `json:"name" gorm:"column:name; not null"`
 	Email      string `json:"email" gorm:"unique;not null"`
 	Password   string `json:"password" gorm:"not null"`
-	RoleId     int    `json:"role_id" gorm:"column:role_id;default:0"` // 3: root, 2: company_admin, 0: user
+	RoleId     int    `json:"role_id" gorm:"column:role_id;default:0"` // 2:ROOT: , 1: ADMIN, 0: USER
 	CompanyId  int    `json:"company_id" gorm:"column:company_id;default:0"`
 	IsVerified bool   `json:"is_verified" gorm:"column:is_verified"`
 }
