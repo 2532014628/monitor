@@ -101,13 +101,13 @@ func Register(c *gin.Context) {
 	err = m_init.DB.Where("name =?", input.Company).First(&company).Error
 	if err == nil {
 		companyId = company.ID
-	}else if errors.Is(err, gorm.ErrRecordNotFound) {
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
 		companyId = 0
-	}else{
+	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
-		return	
+		return
 	}
-	
+
 	// 创建用户
 	newUser := u.User{
 		Name:       input.Name,
@@ -181,9 +181,17 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// 查询用户角色
+	var role u.Role
+	if err := m_init.DB.Table("roles").Where("id = ?", user.RoleId).First(&role).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "查询用户角色失败"})
+		return
+	}
+
 	// 登录成功
 	c.JSON(http.StatusOK, gin.H{
 		"message": "登录成功",
+		"role":    role.Name,
 		"token":   tokenString,
 	})
 }

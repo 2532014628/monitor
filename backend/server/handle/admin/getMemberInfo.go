@@ -15,8 +15,8 @@ func GetMemberInfo(c *gin.Context) {
 	var company u.Company
 	companyName := c.Query("companyName")
 	if companyName == "" { // 未传递公司名，默认当前登录用户（管理员）所在的公司
-		// 判断当前用户是否有公司管理员权限
-		if !IsAdmin(username.(string)) {
+		// 判断当前用户是否有管理员权限
+		if !IsAdmin(username.(string)) || !IsRoot(username.(string)) {
 			c.JSON(http.StatusForbidden, gin.H{"message": "非公司管理员，权限不足"})
 			return
 		}

@@ -20,6 +20,10 @@ func IsRoot(username string) bool {
 	return user.RoleId == 2
 }
 
+type Request struct {
+	Name string `json:"company-name"`
+}
+
 // 获取指定公司的信息
 func GetCompanyInfo(c *gin.Context) {
 	username, _ := c.Get("username")
@@ -42,9 +46,9 @@ func GetCompanyInfo(c *gin.Context) {
 		// 查询管理员所在公司
 		if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				c.JSON(http.StatusUnauthorized, gin.H{"message": "公司不存在"})
-				return	
-			}else{
+				c.JSON(http.StatusUnauthorized, gin.H{"message": "当前管理员未加入任何公司"})
+				return
+			} else {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
 				return
 			}
@@ -54,7 +58,7 @@ func GetCompanyInfo(c *gin.Context) {
 		if !IsRoot(username.(string)) {
 			// 非系统管理员，判断是否为指定公司的管理员
 			if !IsAdmin(username.(string)) {
-				c.JSON(http.StatusForbidden, gin.H{"message": "非系统管理员或公司管理员，权限不足"})
+				c.JSON(http.StatusForbidden, gin.H{"message": "非管理员，权限不足"})
 				return
 			}
 			// 查询管理员信息
@@ -71,7 +75,7 @@ func GetCompanyInfo(c *gin.Context) {
 			}
 			// 判断是否为指定公司的管理员
 			if company.ID != admin.CompanyId {
-				c.JSON(http.StatusForbidden, gin.H{"message": "系统管理员或指定公司的管理员，权限不足"})
+				c.JSON(http.StatusForbidden, gin.H{"message": "非系统管理员或指定公司的管理员，权限不足"})
 				return
 			}
 		}
