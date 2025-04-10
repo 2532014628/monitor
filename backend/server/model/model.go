@@ -155,7 +155,7 @@ func InsertHostInfo(hostInfo HostInfo, username string) error {
 	return nil
 }
 
-func InsertSystemInfo(hostname string, hostInfo HostInfo, cpuInfo []CPUInfo, memoryInfo MemoryInfo, processInfo []ProcessInfo, networkInfo []NetworkInfo) error {
+func InsertSystemInfo(hostname string, hostInfo HostInfo, cpuInfo []CPUInfo, memoryInfo MemoryInfo, networkInfo []NetworkInfo) error {
 	// 检查是否已经存在对应的 system_info 记录
 	var exists bool
 
@@ -209,11 +209,11 @@ func InsertSystemInfo(hostname string, hostInfo HostInfo, cpuInfo []CPUInfo, mem
 		return fmt.Errorf("InsertSystemInfo : failed to marshal memoryData: %v", err)
 	}
 
-	processData := processInfo
-	processDataJSON, err := json.Marshal(processData)
-	if err != nil {
-		return fmt.Errorf("InsertSystemInfo : failed to marshal processData: %v", err)
-	}
+	//processData := processInfo
+	//processDataJSON, err := json.Marshal(processData)
+	//if err != nil {
+	//	return fmt.Errorf("InsertSystemInfo : failed to marshal processData: %v", err)
+	//}
 	networkData := networkInfo
 	networkDataJSON, err := json.Marshal(networkData)
 	if err != nil {
@@ -233,8 +233,8 @@ func InsertSystemInfo(hostname string, hostInfo HostInfo, cpuInfo []CPUInfo, mem
 	// 将新数据插入到TDengine中
 	insertData := fmt.Sprintf(`
 		INSERT INTO %s (created_at, host_name, host_info, cpu_info, memory_info, process_info, network_info) 
-		VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')
-	`, tableName, currentTime, hostname, string(hostDataJSON), string(cpuDataJSON), string(memoryDataJSON), string(processDataJSON), string(networkDataJSON))
+		VALUES ('%s', '%s', '%s', '%s', '%s', '%s')
+	`, tableName, currentTime, hostname, string(hostDataJSON), string(cpuDataJSON), string(memoryDataJSON), string(networkDataJSON))
 	_, err = TDengine.Exec(insertData)
 	if err != nil {
 		return fmt.Errorf("failed to g data into table for host %s: %w", hostname, err)

@@ -158,3 +158,6 @@ coverage/
 # 忽略测试目录
 oss_test/
 tdengine_test/
+.idea/material_theme_project_new.xml
+.idea/servermanage.iml
+frontend/

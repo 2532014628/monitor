@@ -1,8 +1,8 @@
 package company
 
 import (
-	m_init "cmd/server/model/init"
-	u "cmd/server/model/user"
+	m_init "backend/server/model/init"
+	u "backend/server/model/user"
 	"errors"
 	"log"
 	"net/http"
@@ -54,8 +54,8 @@ func JoinCompany(c *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Printf("用户不存在")
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "用户不存在"})
-			return	
-		}else{
+			return
+		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询用户名失败"})
 			return
 		}

@@ -1,8 +1,8 @@
 package company
 
 import (
-	m_init "cmd/server/model/init"
-	u "cmd/server/model/user"
+	m_init "backend/server/model/init"
+	u "backend/server/model/user"
 	"errors"
 	"log"
 	"net/http"
@@ -10,26 +10,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-
 )
 
 // RegisterRequest 定义了公司注册请求结构体
 type RegisterRequest struct {
-    Username string `json:"username"`
+	Username string `json:"username"`
 	Company  string `json:"company"`
 	RealName string `json:"realname"`
 	Identity string `json:"identity"`
 }
 
-//检查法人是否年满18周岁和年月日部分是否合法
+// 检查法人是否年满18周岁和年月日部分是否合法
 func checkLegalAge(identity string) bool {
 
 	yearStr := identity[6:10]
-	year , _ := strconv.Atoi(yearStr)
+	year, _ := strconv.Atoi(yearStr)
 	monthStr := identity[10:12]
-	month , _ := strconv.Atoi(monthStr)
+	month, _ := strconv.Atoi(monthStr)
 	dayStr := identity[12:14]
-	day , _ := strconv.Atoi(dayStr)
+	day, _ := strconv.Atoi(dayStr)
 
 	if year < 1900 || year > 2007 || month < 1 || month > 12 || day < 1 || day > 31 {
 		return false
@@ -45,47 +44,47 @@ func checkLegalAge(identity string) bool {
 			}
 		}
 	} else if month == 4 || month == 6 || month == 9 || month == 11 {
-		if day >30 {
+		if day > 30 {
 			return false
 		}
-	}else {
+	} else {
 		if day > 31 {
 			return false
 		}
 	}
-    return true
+	return true
 }
 
-//对身份证格式进行检验
+// 对身份证格式进行检验
 func checkIdentity(identity string) bool {
-    // 身份证长度为18位
-    if len(identity) != 18 {
-        return false
-    }
+	// 身份证长度为18位
+	if len(identity) != 18 {
+		return false
+	}
 
-    // 检查每一位是否为数字或最后一位为大写X
-    for i, char := range identity {
-        if i < 17 && (char < '0' || char > '9') {
-            return false
-        }
-        if i == 17 && char != 'X' && (char < '0' || char > '9') {
-            return false
-        }
-    }
+	// 检查每一位是否为数字或最后一位为大写X
+	for i, char := range identity {
+		if i < 17 && (char < '0' || char > '9') {
+			return false
+		}
+		if i == 17 && char != 'X' && (char < '0' || char > '9') {
+			return false
+		}
+	}
 
-    // 计算校验码
-    weights := []int{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2}
-    sum := 0
-    for i := 0; i < 17; i++ {
-        digit := int(identity[i] - '0')
-        sum += digit * weights[i]
-    }
+	// 计算校验码
+	weights := []int{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2}
+	sum := 0
+	for i := 0; i < 17; i++ {
+		digit := int(identity[i] - '0')
+		sum += digit * weights[i]
+	}
 
-    remainder := sum % 11
-    validChecksums := "10X98765432"
-    expectedChecksum := validChecksums[remainder]
+	remainder := sum % 11
+	validChecksums := "10X98765432"
+	expectedChecksum := validChecksums[remainder]
 
-    return identity[17] == expectedChecksum
+	return identity[17] == expectedChecksum
 }
 
 func Register(c *gin.Context) {
@@ -112,7 +111,7 @@ func Register(c *gin.Context) {
 
 	//检查当前用户用户名是否和公司法人匹配
 	if username != input.Username {
-		c.JSON(http.StatusUnauthorized , gin.H{"message": "没有权限注册"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "没有权限注册"})
 		return
 	}
 
@@ -140,7 +139,7 @@ func Register(c *gin.Context) {
 
 	//检查法人身份证和真实名字是否匹配
 	//暂时还没有，跳过
-	
+
 	//查找该法人的id
 	var user u.User
 	if err := m_init.DB.Where("name = ?", username).First(&user).Error; err != nil {
@@ -150,10 +149,10 @@ func Register(c *gin.Context) {
 
 	//创建公司
 	newCompany := u.Company{
-		Name: input.Company,
-		AdminID: user.ID,
+		Name:        input.Company,
+		AdminID:     user.ID,
 		Description: "暂无",
-		MemberNum: 1,
+		MemberNum:   1,
 	}
 	if err := m_init.DB.Create(&newCompany).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库创建公司失败"})

@@ -83,7 +83,7 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 	}
 
 	// 插入 system_info 表
-	err = model.InsertSystemInfo(requestData.HostInfo.Hostname, requestData.HostInfo, requestData.CPUInfo, requestData.MemInfo, requestData.ProInfo, requestData.NetInfo)
+	err = model.InsertSystemInfo(requestData.HostInfo.Hostname, requestData.HostInfo, requestData.CPUInfo, requestData.MemInfo, requestData.NetInfo)
 	if err != nil {
 		s := fmt.Sprintf("Failed to insert system info: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": s})

@@ -1,11 +1,11 @@
 package company
 
 import (
-	m_init "cmd/server/model/init"
+	m_init "backend/server/model/init"
 	"net/http"
 
-	admin "cmd/server/handle/admin"
-	u "cmd/server/model/user"
+	admin "backend/server/handle/admin"
+	u "backend/server/model/user"
 
 	"github.com/gin-gonic/gin"
 )

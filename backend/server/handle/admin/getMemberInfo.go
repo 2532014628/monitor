@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	m_init "cmd/server/model/init"
-	u "cmd/server/model/user"
+	m_init "backend/server/model/init"
+	u "backend/server/model/user"
 )
 
 func GetMemberInfo(c *gin.Context) {
