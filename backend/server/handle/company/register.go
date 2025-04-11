@@ -14,10 +14,10 @@ import (
 
 // RegisterRequest 定义了公司注册请求结构体
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Company  string `json:"company"`
-	RealName string `json:"realname"`
-	Identity string `json:"identity"`
+	Company            string `json:"company"`
+	Social_Credit_Code string `json:"social_credit_code"`
+	RealName           string `json:"realname"`
+	Identity           string `json:"identity"`
 }
 
 // 检查法人是否年满18周岁和年月日部分是否合法
@@ -109,12 +109,6 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	//检查当前用户用户名是否和公司法人匹配
-	if username != input.Username {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "没有权限注册"})
-		return
-	}
-
 	//检查公司名是否已经存在
 	var company u.Company
 	if err := m_init.DB.Where("name = ?", input.Company).First(&company).Error; err == nil {
@@ -134,6 +128,12 @@ func Register(c *gin.Context) {
 	//检查法人的身份证格式
 	if !checkIdentity(input.Identity) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "身份证格式错误"})
+		return
+	}
+
+	//简单检查社会信用代码格式是否正确
+	if len(input.Social_Credit_Code) != 18 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "社会信用代码应该为18位"})
 		return
 	}
 
