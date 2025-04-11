@@ -89,6 +89,14 @@ CREATE TABLE IF NOT EXISTS hostandtoken (
 	status VARCHAR(10) DEFAULT 'offline'
 );
 
+-- sshkey表
+CREATE TABLE IF NOT EXISTS ssh_keys (
+    id SERIAL PRIMARY KEY,
+    host_name VARCHAR(255) , 
+    sshkey TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 在system_info表的host_info_id字段上创建索引，加速通过主机ID查找系统信息
 -- CREATE INDEX IF NOT EXISTS idx_system_info_host_info_id ON system_info(host_info_id);
 
@@ -338,6 +346,13 @@ func InitDBData() error {
 	}
 	fmt.Println("5---------------")
 
+	//插入 sshkeys数据
+	if err := insertSSHKeys(tx); err != nil {
+		tx.Rollback() // 回滚事务
+		return err    // 返回插入 sshkeys 信息时的错误
+	}
+	fmt.Println("6---------------")
+
 	if err := tx.Commit().Error; err != nil {
 		return err // 返回提交事务时的错误
 	}
@@ -536,9 +551,9 @@ func insertSystemInfo(t *sql.DB) error {
 		// fmt.Println("networkInfo:", networkInfo)
 
 		// 验证每个 JSON 字符串的有效性
-		if !isValidJSON(hostInfo) || !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
-			return fmt.Errorf("invalid JSON data for host %s", hostName)
-		}
+		//if !isValidJSON(hostInfo) || !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
+		//	return fmt.Errorf("invalid JSON data for host %s", hostName)
+		//}
 
 		// 插入数据库（注意：这里假设数据库表 system_info 的对应字段已经设置为接受 jsonb 类型）
 		//if err := tx.Exec(
@@ -625,6 +640,37 @@ func insertHostAndToken(tx *gorm.DB) error {
 
 		if err := tx.Exec("INSERT INTO hostandtoken (host_name, token, status) VALUES (?, ?, ?)", hostName, token, status).Error; err != nil {
 			return fmt.Errorf("failed to insert token for host %s: %w", hostName, err) // 返回详细错误
+		}
+	}
+	return scanner.Err()
+}
+
+//
+func insertSSHKeys(tx *gorm.DB) error {
+	file, err := os.Open("asset/example/sshkeys.txt")
+	if err != nil {
+		return fmt.Errorf("failed to open sshkeys file: %w", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
+		parts := strings.Split(line, ",")
+		if len(parts) < 2 {
+			return fmt.Errorf("invalid line format: %s", line)
+		}
+
+		hostname := parts[0]
+		sshkey := parts[1]
+
+		if err := tx.Exec("INSERT INTO ssh_keys (host_name,sshkey) VALUES (?, ?)", hostname,sshkey).Error; err != nil {
+			return fmt.Errorf("failed to insert ssh_keys for %s: %w", hostname, err)
 		}
 	}
 	return scanner.Err()

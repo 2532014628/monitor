@@ -127,6 +127,7 @@ func main() {
 		auth.GET("/getmemberinfo", admin.GetMemberInfo)       // 获取公司成员信息
 		auth.GET("/get-company-info", admin.GetCompanyInfo)   // 指定公司的信息（含成员信息）
 		auth.GET("/get-company-list", company.GetCompanyList) // 公司列表
+		auth.POST("/addSShkey", admin.AddSShkey)               // 添加SSH密钥
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)

@@ -24,3 +24,9 @@ type Role struct {
 	Name        string `json:"name" gorm:"column:role_name"`
 	Description string `json:"description" gorm:"description"`
 }
+
+type SSHKey struct {
+	ID        int    `json:"id" gorm:"primarykey;autoIncrement"`
+	Hostname  string `json:"host_name" gorm:"column:host_name"`
+	SSHKey    string `json:"sshkey" gorm:"column:sshkey"`
+}

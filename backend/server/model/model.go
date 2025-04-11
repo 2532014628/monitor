@@ -288,6 +288,63 @@ func InsertHostandToken(hostname string, Token string) error {
 	return nil
 }
 
+func InsertSSHKeys(hostname string , sshkey string) error{
+	var existingID int
+	//查询在host_info表中是否存在该主机名
+	querySQL := `
+	SELECT id
+	FROM host_info
+	WHERE host_name = $1`
+
+	err := DB.QueryRow(querySQL, hostname).Scan(&existingID)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("failed to query host_info: %v", err)
+	}
+	if existingID == 0 {
+		return fmt.Errorf("host_info with hostname '%s' does not exist", hostname)
+	}
+
+	// 查询是否在sshkeys表存在该主机名
+	querySQL = `
+	SELECT id
+	FROM ssh_keys
+	WHERE host_name = $1`
+
+	err = DB.QueryRow(querySQL, hostname).Scan(&existingID)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("failed to query sshkeys: %v", err)
+	}
+	if existingID > 0 {
+		// 更新已存在的记录
+		updateSQL := `
+        UPDATE ssh_keys                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+		SET 
+		    sshkey= $1,
+		WHERE host_name = $2`
+		_, err = DB.Exec(updateSQL, sshkey, hostname)
+		if err != nil {
+			fmt.Printf("Failed to update sshkeys's sshkey: %v\n", err)
+			return err
+		}
+		fmt.Printf("Updated existing sshkeys with sshkey: %s\n", sshkey)
+		return nil
+	}
+
+	// 插入新的记录
+	fmt.Println("Inserting new sshkey")
+	insertSQL := `
+	INSERT INTO ssh_keys (host_name, sshkey)
+	VALUES ($1, $2) `
+	err = DB.QueryRow(insertSQL, hostname, sshkey).Err()
+	if err != nil {
+		log.Fatalf("Failed to insert sshkeys info: %v\n", err)
+		return err
+	}
+	log.Println("Insert successfully")
+
+	return nil
+}
+
 func ReadMemoryInfo(hostname string, from, to string, result map[string]interface{}) error {
 	// 使用 TDengine 连接替代 PostgreSQL 连接
 	tableName := fmt.Sprintf("%s_system_info", hostname)
@@ -673,3 +730,26 @@ func UpdateToken(db *sql.DB, hostName string, token string, lastHeartBeat time.T
 	}
 	return nil
 }
+
+func UpdateSSHKeys(db *sql.DB, hostName string, sshKeys string) error {
+	//判断sshkeys表是否存在该hostname
+	var existingID int 
+	err := db.QueryRow("SELECT id FROM hostandtoken WHERE host_name = ", hostName).Scan(&existingID)
+	if err != nil {
+		return err
+	}
+	if err == sql.ErrNoRows {
+		return err
+	}
+
+	if existingID <= 0 {
+		return fmt.Errorf("hostname not found in sshkeys table")
+	}
+
+	_, err = db.Exec("UPDATE sshkeys SET ssh_keys = ? WHERE host_name = ?", sshKeys, hostName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
