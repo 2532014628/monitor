@@ -2,6 +2,7 @@ package admin
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,12 +34,14 @@ func GetCompanyInfo(c *gin.Context) {
 	if companyName == "" { // 未传递公司名，默认当前登录用户（管理员）所在的公司
 		// 判断当前用户是否有管理员权限
 		if !IsAdmin(username.(string)) && !IsRoot(username.(string)) {
+			log.Println("非管理员，权限不足")
 			c.JSON(http.StatusForbidden, gin.H{"message": "非管理员，权限不足"})
 			return
 		}
 		// 查询管理员信息
 		var admin u.User
 		if err := m_init.DB.Where("name =?", username.(string)).First(&admin).Error; err != nil {
+			log.Printf("数据库查询管理员失败")
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询管理员失败"})
 			return
 		}
@@ -46,9 +49,11 @@ func GetCompanyInfo(c *gin.Context) {
 		// 查询管理员所在公司
 		if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.Println("当前管理员未加入任何公司")
 				c.JSON(http.StatusUnauthorized, gin.H{"message": "当前管理员未加入任何公司"})
 				return
 			} else {
+				log.Println("数据库查询公司失败")
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
 				return
 			}
@@ -58,29 +63,37 @@ func GetCompanyInfo(c *gin.Context) {
 		if !IsRoot(username.(string)) {
 			// 非系统管理员，判断是否为指定公司的管理员
 			if !IsAdmin(username.(string)) {
+				log.Println("非系统管理员或公司管理员，权限不足")
 				c.JSON(http.StatusForbidden, gin.H{"message": "非管理员，权限不足"})
 				return
 			}
 			// 查询管理员信息
 			var admin u.User
 			if err := m_init.DB.Where("name =?", username.(string)).First(&admin).Error; err != nil {
+				log.Println("数据库查询管理员失败")
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询管理员失败"})
 				return
 			}
 
 			// 查询管理员所在公司
 			if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					log.Println("当前管理员未加入任何公司")
+				}
+				log.Println("数据库查询公司失败")
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
 				return
 			}
 			// 判断是否为指定公司的管理员
 			if company.ID != admin.CompanyId {
+				log.Println("非系统管理员或指定公司的管理员，权限不足")
 				c.JSON(http.StatusForbidden, gin.H{"message": "非系统管理员或指定公司的管理员，权限不足"})
 				return
 			}
 		}
 		// 系统管理员，查询指定公司信息
 		if err := m_init.DB.Where("name = ?", companyName).First(&company).Error; err != nil {
+			log.Println("数据查询公司失败")
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据查询公司失败"})
 			return
 		}
@@ -89,6 +102,7 @@ func GetCompanyInfo(c *gin.Context) {
 	// 查询公司成员
 	var members []u.User
 	if err := m_init.DB.Where("company_id =?", company.ID).Find(&members).Error; err != nil {
+		log.Println("数据库查询公司成员失败")
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司成员失败"})
 		return
 	}

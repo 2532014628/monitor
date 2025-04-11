@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,17 +18,20 @@ func GetMemberInfo(c *gin.Context) {
 	if companyName == "" { // 未传递公司名，默认当前登录用户（管理员）所在的公司
 		// 判断当前用户是否有管理员权限
 		if !IsAdmin(username.(string)) || !IsRoot(username.(string)) {
+			log.Println("非公司管理员，权限不足")
 			c.JSON(http.StatusForbidden, gin.H{"message": "非公司管理员，权限不足"})
 			return
 		}
 		// 查询管理员信息
 		var admin u.User
 		if err := m_init.DB.Where("name =?", username.(string)).First(&admin).Error; err != nil {
+			log.Println("数据库查询管理员失败")
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询管理员失败"})
 			return
 		}
 		// 查询管理员所在公司
 		if err := m_init.DB.Where("id =?", admin.CompanyId).First(&company).Error; err != nil {
+			log.Println("数据库查询公司失败")
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询公司失败"})
 			return
 		}

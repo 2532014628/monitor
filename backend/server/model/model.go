@@ -54,7 +54,7 @@ type RequestData struct {
 	HostInfo HostInfo      `json:"host_info"`
 	MemInfo  MemoryInfo    `json:"mem_info"`
 	ProInfo  []ProcessInfo `json:"pro_info"`
-	NetInfo  NetworkInfo   `json:"net_info"`
+	NetInfo  []NetworkInfo `json:"net_info"`
 }
 
 type Claims struct {
@@ -232,9 +232,8 @@ func InsertSystemInfo(hostname string, hostInfo HostInfo, cpuInfo []CPUInfo, mem
 
 	// 将新数据插入到TDengine中
 	insertData := fmt.Sprintf(`
-		INSERT INTO %s (created_at, host_name, host_info, cpu_info, memory_info, process_info, network_info) 
-		VALUES ('%s', '%s', '%s', '%s', '%s', '%s')
-	`, tableName, currentTime, hostname, string(hostDataJSON), string(cpuDataJSON), string(memoryDataJSON), string(networkDataJSON))
+		INSERT INTO %s (created_at, host_name, host_info, cpu_info, memory_info,network_info) 
+		VALUES ('%s', '%s', '%s', '%s', '%s', '%s')`, tableName, currentTime, hostname, string(hostDataJSON), string(cpuDataJSON), string(memoryDataJSON), string(networkDataJSON))
 	_, err = TDengine.Exec(insertData)
 	if err != nil {
 		return fmt.Errorf("failed to g data into table for host %s: %w", hostname, err)
@@ -368,20 +367,20 @@ func ReadCPUInfo(hostname string, from, to string, result map[string]interface{}
 			return fmt.Errorf("CPU数据扫描失败: %v", err)
 		}
 
-		var cpuDataObj CPUInfo
+		var cpuDataObj []CPUInfo
 		if err := json.Unmarshal(cpuInfoJSON, &cpuDataObj); err != nil {
 			return fmt.Errorf("CPU数据解析失败: %v", err)
 		}
-
-		cpuData = append(cpuData, map[string]interface{}{
-			"id":                  cpuDataObj.ID,
-			"cores_num":           cpuDataObj.CoresNum,
-			"model_name":          cpuDataObj.ModelName,
-			"percent":             cpuDataObj.Percent,
-			"cpu_info_created_at": cpuDataObj.CreatedAt,
-		})
+		for _, cpu := range cpuDataObj {
+			cpuData = append(cpuData, map[string]interface{}{
+				"id":                  cpu.ID,
+				"cores_num":           cpu.CoresNum,
+				"model_name":          cpu.ModelName,
+				"percent":             cpu.Percent,
+				"cpu_info_created_at": cpu.CreatedAt,
+			})
+		}
 	}
-
 	result["cpu"] = cpuData
 	return nil
 }
@@ -446,18 +445,20 @@ func ReadNetInfo(hostname string, from, to string, result map[string]interface{}
 			return fmt.Errorf("网络数据扫描失败: %v", err)
 		}
 
-		var netDataObj NetworkInfo
+		var netDataObj []NetworkInfo
 		if err := json.Unmarshal(networkJSON, &netDataObj); err != nil {
 			return fmt.Errorf("网络数据解析失败: %v", err)
 		}
 
-		netData = append(netData, map[string]interface{}{
-			"id":                  netDataObj.ID,
-			"name":                netDataObj.Name,
-			"bytes_sent":          netDataObj.BytesSent,
-			"bytes_recv":          netDataObj.BytesRecv,
-			"net_info_created_at": netDataObj.CreatedAt,
-		})
+		for _, net := range netDataObj {
+			netData = append(netData, map[string]interface{}{
+				"id":                  net.ID,
+				"name":                net.Name,
+				"bytes_sent":          net.BytesSent,
+				"bytes_recv":          net.BytesRecv,
+				"net_info_created_at": net.CreatedAt,
+			})
+		}
 	}
 
 	result["net"] = netData
@@ -511,13 +512,13 @@ func ReadDB(queryType, from, to string, hostname string) (map[string]interface{}
 		}
 	}
 
-	// 查询进程信息
-	if queryType == "process" || queryType == "all" {
-		err := ReadProcessInfo(hostname, from, to, result)
-		if err != nil {
-			return nil, err
-		}
-	}
+	//// 查询进程信息
+	//if queryType == "process" || queryType == "all" {
+	//	err := ReadProcessInfo(hostname, from, to, result)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
 
 	return result, nil
 }

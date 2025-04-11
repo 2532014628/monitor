@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,7 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 	var requestData RequestData
 	if err := c.ShouldBindJSON(&requestData); err != nil {
 		s := fmt.Sprintf("Invalid JSON data: %s", err)
+		log.Printf("Invalid JSON data: %s", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": s})
 		return
 	}
@@ -68,6 +70,7 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
     WHERE host_name = $1`
 	_, err = model.DB.Exec(updateSQL, requestData.HostInfo.Hostname)
 	if err != nil {
+		log.Printf("Failed to update heartbeat and status: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update heartbeat and status"})
 		return
 	}
@@ -78,6 +81,7 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 	err = model.InsertHostandToken(requestData.HostInfo.Hostname, tokenh)
 	if err != nil {
 		s := fmt.Sprintf("Failed to insert host and token info: %s", err)
+		log.Printf("Failed to insert host and token info: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": s})
 		return
 	}
@@ -86,6 +90,7 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 	err = model.InsertSystemInfo(requestData.HostInfo.Hostname, requestData.HostInfo, requestData.CPUInfo, requestData.MemInfo, requestData.NetInfo)
 	if err != nil {
 		s := fmt.Sprintf("Failed to insert system info: %s", err)
+		log.Printf("Failed to insert system info: %s", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": s})
 		return
 	}
