@@ -288,7 +288,7 @@ func InsertHostandToken(hostname string, Token string) error {
 	return nil
 }
 
-func InsertSSHKeys(hostname string , sshkey string) error{
+func InsertSSHKeys(hostname string, sshkey string) error {
 	var existingID int
 	//查询在host_info表中是否存在该主机名
 	querySQL := `
@@ -733,7 +733,7 @@ func UpdateToken(db *sql.DB, hostName string, token string, lastHeartBeat time.T
 
 func UpdateSSHKeys(db *sql.DB, hostName string, sshKeys string) error {
 	//判断sshkeys表是否存在该hostname
-	var existingID int 
+	var existingID int
 	err := db.QueryRow("SELECT id FROM hostandtoken WHERE host_name = ", hostName).Scan(&existingID)
 	if err != nil {
 		return err
@@ -752,4 +752,3 @@ func UpdateSSHKeys(db *sql.DB, hostName string, sshKeys string) error {
 	}
 	return nil
 }
-

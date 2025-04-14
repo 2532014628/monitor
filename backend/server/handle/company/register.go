@@ -14,7 +14,6 @@ import (
 
 // RegisterRequest 定义了公司注册请求结构体
 type RegisterRequest struct {
-	Username string `json:"username"`
 	Company  string `json:"company"`
 	RealName string `json:"realname"`
 	Identity string `json:"identity"`
@@ -106,12 +105,6 @@ func Register(c *gin.Context) {
 	// 解析JSON数据
 	if err := c.BindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "请求数据格式错误"})
-		return
-	}
-
-	//检查当前用户用户名是否和公司法人匹配
-	if username != input.Username {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "没有权限注册"})
 		return
 	}
 

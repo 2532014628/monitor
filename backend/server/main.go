@@ -12,6 +12,7 @@ import (
 	"backend/server/middlewire"
 	"backend/server/middlewire/cors"
 	db "backend/server/model/init"
+	"backend/server/redis"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -67,12 +68,18 @@ func main() {
 	os.Setenv("SMTP_SERVER_HOST", config.SMTPServer.Host)
 	os.Setenv("SMTP_SERVER_PORT", config.SMTPServer.Port)
 	// Redis服务
-	os.Setenv("REDIS_ADDR", config.Redis.Addr)
+	os.Setenv("REDIS_HOST", config.Redis.Host)
 	os.Setenv("REDIS_PASSWORD", config.Redis.Password)
+	os.Setenv("REDIS_PORT", config.Redis.Port)
 	os.Setenv("REDIS_DB", config.Redis.DB)
 
 	router := gin.Default()
 	router.Use(cors.CORSMiddleware())
+	// 初始化 Redis 连接
+	if err := redis.InitRedis(); err != nil {
+		log.Fatalf("Failed to initialize Redis: %v", err)
+	}
+
 	// 连接数据库
 	if err := db.ConnectDatabase(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -127,12 +134,13 @@ func main() {
 		auth.GET("/getmemberinfo", admin.GetMemberInfo)       // 获取公司成员信息
 		auth.GET("/get-company-info", admin.GetCompanyInfo)   // 指定公司的信息（含成员信息）
 		auth.GET("/get-company-list", company.GetCompanyList) // 公司列表
-		auth.POST("/sshkey", admin.AddSShkey)               // 添加SSH密钥
+		auth.POST("/sshkey", admin.AddSShkey)                 // 添加SSH密钥
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)
 		auth.GET("/list", monitor.ListAgent)
 		auth.GET("/monitor/:hostname", monitor.GetAgentInfo)
+		auth.GET("/monitor/status/:hostname", monitor.GetLatestSystemInfo)
 	}
 	router.POST("/agent/addSystem_info", monitor.ReceiveAndStoreSystemMetrics)
 	router.Run("0.0.0.0:8080")

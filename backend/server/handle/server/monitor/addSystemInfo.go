@@ -2,11 +2,13 @@ package monitor
 
 import (
 	"backend/server/model"
-	"database/sql"
-	"errors"
+	"backend/server/redis"
+	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -36,7 +38,6 @@ type RequestData struct {
 // @Failure 500 {object} map[string]string "数据库操作失败"
 // @Router /monitor [post]
 func ReceiveAndStoreSystemMetrics(c *gin.Context) {
-
 	// 解析请求数据
 	var requestData RequestData
 	if err := c.ShouldBindJSON(&requestData); err != nil {
@@ -45,53 +46,23 @@ func ReceiveAndStoreSystemMetrics(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": s})
 		return
 	}
-	tokenh := requestData.HostInfo.Token
-	var tokens string
-	querySQL := `
-	SELECT token 
-	FROM hostandtoken WHERE host_name = $1` //(SELECT 1 FROM hostandtoken WHERE host_name = $1)
 
-	err := model.DB.QueryRow(querySQL, requestData.HostInfo.Hostname).Scan(&tokens)
-	if errors.Is(err, sql.ErrNoRows) {
-		fmt.Println("No matching token.")
-	}
-	if len(tokenh) != 16 {
-		//c.JSON(http.StatusBadRequest, gin.H{"error": "Wrong token length"})
-		//return
-	} else if tokenh != tokens {
-		//c.JSON(h ttp.StatusBadRequest, gin.H{"error": "Unequal string"})
-		//return
-	}
-
-	// 更新心跳时间和状态为在线
-	updateSQL := `
-    UPDATE hostandtoken 
-    SET last_heartbeat = NOW(), status = 'online' 
-    WHERE host_name = $1`
-	_, err = model.DB.Exec(updateSQL, requestData.HostInfo.Hostname)
+	// 将数据插入 Redis
+	ctx := context.Background()
+	timestamp := time.Now().Unix() // 获取当前时间戳
+	key := fmt.Sprintf("system_info:%s:%d", requestData.HostInfo.Hostname, timestamp)
+	jsonData, err := json.Marshal(requestData)
 	if err != nil {
-		log.Printf("Failed to update heartbeat and status: %s", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update heartbeat and status"})
+		log.Printf("Failed to marshal data to JSON: %s", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal data to JSON"})
 		return
 	}
 
-	// 将数据插入数据库
-
-	// 插入 hostandtoken 表
-	err = model.InsertHostandToken(requestData.HostInfo.Hostname, tokenh)
+	// 将 JSON 字符串存储到 Redis
+	err = redis.Rdb.Set(ctx, key, jsonData, 30*time.Minute).Err()
 	if err != nil {
-		s := fmt.Sprintf("Failed to insert host and token info: %s", err)
-		log.Printf("Failed to insert host and token info: %s", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": s})
-		return
-	}
-
-	// 插入 system_info 表
-	err = model.InsertSystemInfo(requestData.HostInfo.Hostname, requestData.HostInfo, requestData.CPUInfo, requestData.MemInfo, requestData.NetInfo)
-	if err != nil {
-		s := fmt.Sprintf("Failed to insert system info: %s", err)
-		log.Printf("Failed to insert system info: %s", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": s})
+		log.Printf("Failed to insert data into Redis: %s", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert data into Redis"})
 		return
 	}
 

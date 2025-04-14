@@ -24,7 +24,17 @@ docker run -it \
 -d postgres
 
 ## 第三步:启动redis
-暂无
+docker run \
+-itd \
+--name redis \
+--network root_default \
+-p 6379:6379 \
+--restart unless-stopped \
+-v /usr/local/software/redis/data:/data \
+-v /usr/local/software/redis/conf/redis.conf:/etc/redis/redis.conf \
+redis:latest /etc/redis/redis.conf
+[//]: # (redis-server /etc/redis/redis.conf \)
+
 ## 第四步:启动程序运行容器
 docker   run   -dit  \
 -p 8080:8080  \

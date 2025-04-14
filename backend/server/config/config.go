@@ -18,7 +18,7 @@ type DBConfig struct {
 	Password string `yaml:"password"`
 }
 
-//TDengineConfig 用于保存TDengine数据库配置
+// TDengineConfig 用于保存TDengine数据库配置
 type TDengineConfig struct {
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
@@ -35,9 +35,10 @@ type OSSConfig struct {
 }
 
 type RedisConfig struct {
-	Addr     string `yaml:"redis_addr"`
-	Password string `yaml:"redis_password"`
-	DB       string `yaml:"redis_db"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       string `yaml:"db"`
 }
 
 type EMAILConfig struct {

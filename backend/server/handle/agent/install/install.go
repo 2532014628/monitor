@@ -147,44 +147,64 @@ func DoInstallAgent(ss SshInfo) error {
 	}
 	cmd := fmt.Sprintf(
 		`#!/bin/bash
-		# 克隆代码仓库
-        %s
+# 克隆代码仓库
+%s
 
-		git clone https://gitee.com/wu-jinhao111/agent.git
-		cd agent/agent || exit
+git clone https://gitee.com/wu-jinhao111/agent.git
+cd agent/agent || exit
 
-		# 授予执行权限并运行主程序
-		chmod +x main
-		./main -host_name="%s" -token="%s" &
+# 授予执行权限并运行主程序
+chmod +x main
+./main -hostname="%s" -token="%s" &
 
-		# 创建 systemd 服务文件
-		cat <<EOF | sudo tee /etc/systemd/system/main_startup.service
-		[Unit]
-		Description=Main Program Startup Service
-		After=network.target
+# 创建 systemd 服务文件
+cat <<EOF | sudo tee /etc/systemd/system/main_startup.service
+[Unit]
+Description=Main Program Startup Service
+After=network.target
 
-		[Service]
-		Type=simple
-		ExecStart=$HOME/agent/agent/main -host_name=%s -token=%s
-		Restart=always
+[Service]
+Type=simple
+ExecStart=$HOME/agent/agent/main -hostname=%s -token=%s
+Restart=always
 
-		[Install]
-		WantedBy=multi-user.target
-		EOF
+[Install]
+WantedBy=multi-user.target
+EOF
 
-		# 启用并启动服务
-		sudo systemctl enable main_startup.service
-		sudo systemctl start main_startup.service
+# 启用并启动服务
+sudo systemctl enable main_startup.service
+sudo systemctl start main_startup.service
+
 		`,
 		packageCmd, ss.Host_Name, ss.Token, ss.Host_Name, ss.Token)
+	// 使用 channel 来传递执行结果
+	resultChan := make(chan error)
 
-	// 运行命令
-	output, err := session.CombinedOutput(cmd)
-	if err != nil {
-		fmt.Printf("Failed to run command: %s", err)
+	// 启动 goroutine 执行命令
+	go func() {
+		err := session.Start(cmd)
+		if err != nil {
+			resultChan <- fmt.Errorf("failed to run command: %s", err)
+			return
+		}
+
+		// 等待命令完成
+		err = session.Wait()
+		if err != nil {
+			resultChan <- fmt.Errorf("command execution failed: %s", err)
+			return
+		}
+
+		resultChan <- nil
+	}()
+
+	// 设置超时时间为 30 秒
+	select {
+	case err := <-resultChan:
 		return err
+	case <-time.After(30 * time.Second):
+		return nil
 	}
-	fmt.Println(string(output))
-
 	return nil
 }
