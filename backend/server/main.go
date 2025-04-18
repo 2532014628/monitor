@@ -117,9 +117,6 @@ func main() {
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 
-		// 用户操作
-		auth.POST("/joincompany", company.JoinCompany) // 加入公司
-
 		// 系统/公司管理员操作
 		auth.POST("/registercompany", company.Register)       //注册公司
 		auth.POST("/addMember", admin.AddMember)              // 添加成员
@@ -127,7 +124,9 @@ func main() {
 		auth.GET("/getmemberinfo", admin.GetMemberInfo)       // 获取公司成员信息
 		auth.GET("/get-company-info", admin.GetCompanyInfo)   // 指定公司的信息（含成员信息）
 		auth.GET("/get-company-list", company.GetCompanyList) // 公司列表
-		auth.POST("/sshkey", admin.AddSShkey)               // 添加SSH密钥
+		auth.POST("/sshkey", admin.AddSShkey)                 // 添加SSH密钥
+		auth.POST("/joincompany", admin.JoinCompany) 		  // 邀请成员加入公司
+		auth.POST("/replaceadmin",admin.ReplaceAdmin)		  // 更换管理员
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)

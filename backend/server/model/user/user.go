@@ -3,6 +3,7 @@ package model
 type User struct {
 	ID         int    `json:"id" gorm:"primarykey;autoIncrement"`
 	Name       string `json:"name" gorm:"column:name; not null"`
+	Realname   string `json:"realname" gorm:"column:realname; not null"`
 	Email      string `json:"email" gorm:"unique;not null"`
 	Password   string `json:"password" gorm:"not null"`
 	RoleId     int    `json:"role_id" gorm:"column:role_id;default:0"` // 2:ROOT: , 1: ADMIN, 0: USER
@@ -11,12 +12,13 @@ type User struct {
 }
 
 type Company struct {
-	ID          int    `json:"id" gorm:"primarykey;autoIncrement"`
-	Name        string `json:"name" gorm:"column:name; not null"`
-	Description string `json:"description" gorm:"column:description; not null"`
-	AdminID     int    `json:"admin_id" gorm:"column:admin_id; not null"`
-	MemberNum   int    `json:"membernum" gorm:"column:membernum; default:0"`
-	SystemNum   int    `json:"systemnum" gorm:"column:systemnum; default:0"`
+	ID               int    `json:"id" gorm:"primarykey;autoIncrement"`
+	Name             string `json:"name" gorm:"column:name; not null"`
+	SocialCreditCode string `json:"social_credit_code" gorm:"column:social_credit_code; not null"`
+	Description      string `json:"description" gorm:"column:description; not null"`
+	AdminID          int    `json:"admin_id" gorm:"column:admin_id; not null"`
+	MemberNum        int    `json:"membernum" gorm:"column:membernum; default:0"`
+	SystemNum        int    `json:"systemnum" gorm:"column:systemnum; default:0"`
 }
 
 type Role struct {
@@ -26,7 +28,15 @@ type Role struct {
 }
 
 type SSHKey struct {
-	ID        int    `json:"id" gorm:"primarykey;autoIncrement"`
-	Hostname  string `json:"host_name" gorm:"column:host_name"`
-	SSHKey    string `json:"sshkey" gorm:"column:sshkey"`
+	ID       int    `json:"id" gorm:"primarykey;autoIncrement"`
+	Hostname string `json:"host_name" gorm:"column:host_name"`
+	SSHKey   string `json:"sshkey" gorm:"column:sshkey"`
+}
+
+type Notice struct {
+	ID            int    `json:"id" gorm:"primarykey;autoIncrement"`
+	SendName      string `json:"send_name" gorm:"column:send_name"`
+	RecipientName string `json:"recipient_name" gorm:"column:recipient_name"`
+	Content       string `json:"content" gorm:"column:content"`
+	Processed     bool   `json:"processed" gorm:"column:processed"`
 }
