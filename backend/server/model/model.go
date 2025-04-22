@@ -345,6 +345,62 @@ func InsertSSHKeys(hostname string, sshkey string) error {
 	return nil
 }
 
+func InsertNotices(sendname string,recipientname string , content string) error{
+	var exist bool
+	//检查users中是否存在发送者和接收者
+	querySQL := fmt.Sprintf(`
+	SELECT EXISTS (
+		SELECT 1 
+		FROM users 
+		WHERE name IN ('%s', '%s')
+	);`,sendname,recipientname)
+	err := DB.QueryRow(querySQL).Scan(&exist)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("failed to query users: %v", err)
+	}
+	if !exist {
+		return fmt.Errorf("users with name '%s' or '%s' does not exist", sendname, recipientname)
+	}
+
+	//检测在notices是否存在相应的通知记录
+	querySQL = fmt.Sprintf(`
+	SELECT EXISTS (
+		SELECT 1 
+		FROM notices 
+		WHERE send_name = '%s' AND recipient_name = '%s'
+	);`,sendname,recipientname)
+	err = DB.QueryRow(querySQL, sendname, recipientname).Scan(&exist)
+	if err != nil && err != sql.ErrNoRows {
+		return fmt.Errorf("failed to query notices: %v", err)
+	}
+
+	if exist {
+		// 更新已存在的记录
+		updateSQL := `
+        UPDATE notices                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+		SET 
+		    content= $1,
+		WHERE send_name = $2 AND recipient_name = $3`
+		_, err= DB.Exec(updateSQL, content, sendname, recipientname)
+		if err != nil {
+			fmt.Printf("Failed to update notices's content: %v\n", err)
+			return err
+		}
+		return nil
+	}
+	// 插入新的记录
+	insertSQL := `
+	INSERT INTO notices (send_name, recipient_name, content)
+	VALUES ($1, $2, $3) `
+	_, err = DB.Exec(insertSQL, sendname, recipientname, content)
+	if err != nil {
+		log.Fatalf("Failed to insert notices info: %v\n", err)
+		return err
+	}
+	log.Println("Insert successfully")
+	return nil
+}
+
 func ReadMemoryInfo(hostname string, from, to string, result map[string]interface{}) error {
 	// 使用 TDengine 连接替代 PostgreSQL 连接
 	tableName := fmt.Sprintf("%s_system_info", hostname)

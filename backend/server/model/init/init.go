@@ -11,12 +11,14 @@ import (
 	"os"
 	"strconv"
 	"time"
+
 	//"os/signal"
 
 	//"regexp"
 	"strings"
 
 	"database/sql"
+
 	"github.com/go-redis/redis/v8"
 	_ "github.com/taosdata/driver-go/v3/taosSql"
 	"gorm.io/driver/postgres"
@@ -36,6 +38,7 @@ CREATE TABLE IF NOT EXISTS roles (
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR UNIQUE NOT NULL,
+	realname VARCHAR ,
     email VARCHAR UNIQUE NOT NULL,
     password VARCHAR NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
@@ -49,6 +52,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS companies (
     id SERIAL PRIMARY KEY,
     name VARCHAR UNIQUE NOT NULL,
+	social_credit_code VARCHAR(18) UNIQUE NOT NULL,
 	memberNum int DEFAULT 0,
 	systemNum int DEFAULT 0,
     admin_id INT REFERENCES users(id) DEFAULT 0,
@@ -96,6 +100,17 @@ CREATE TABLE IF NOT EXISTS ssh_keys (
     sshkey TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- notice 表
+CREATE TABLE IF NOT EXISTS notices (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+	processed BOOLEAN DEFAULT FALSE,
+	send_name VARCHAR, -- REFERENCES users(name),
+	recipient_name VARCHAR, -- REFERENCES users(name),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- 在system_info表的host_info_id字段上创建索引，加速通过主机ID查找系统信息
 -- CREATE INDEX IF NOT EXISTS idx_system_info_host_info_id ON system_info(host_info_id);
@@ -353,6 +368,13 @@ func InitDBData() error {
 	}
 	fmt.Println("6---------------")
 
+	//插入 notices数据
+	if err := insertNotices(tx); err != nil {
+		tx.Rollback() // 回滚事务
+		return err    // 返回插入 notices 信息时的错误
+	}
+	fmt.Println("7---------------")
+
 	if err := tx.Commit().Error; err != nil {
 		return err // 返回提交事务时的错误
 	}
@@ -428,16 +450,17 @@ func insertUsers(tx *gorm.DB) error {
 			break // 退出循环
 		}
 		parts := strings.Split(line, ",")
-		if len(parts) < 5 {
+		if len(parts) < 6 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
 		name := parts[0]
-		email := parts[1]
-		password := parts[2]
-		roleID := parts[3]
-		companyID := parts[4]
+		realname := parts[1]
+		email := parts[2]
+		password := parts[3]
+		roleID := parts[4]
+		companyID := parts[5]
 
-		if err := tx.Exec("INSERT INTO users (name, email, password, role_id, company_id) VALUES (?, ?, ?, ?, ?)", name, email, password, roleID, companyID).Error; err != nil {
+		if err := tx.Exec("INSERT INTO users (name, realname,email, password, role_id, company_id) VALUES (?, ?, ?, ?, ?, ?)", name, realname, email, password, roleID, companyID).Error; err != nil {
 			return fmt.Errorf("failed to insert user %s: %w", name, err)
 		}
 	}
@@ -496,16 +519,17 @@ func insertCompanies(tx *gorm.DB) error {
 			break // 退出循环
 		}
 		parts := strings.Split(line, ",")
-		if len(parts) < 5 {
+		if len(parts) < 6 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
 
 		name := parts[0]
-		memberNum := parts[1]
-		systemNum := parts[2]
-		admin_id := parts[3]
-		description := parts[4]
-		if err := tx.Exec("INSERT INTO companies (name, memberNum, systemNum, admin_id, description) VALUES (?, ?, ?, ?, ?)", name, memberNum, systemNum, admin_id, description).Error; err != nil {
+		companyCode := parts[1]
+		memberNum := parts[2]
+		systemNum := parts[3]
+		admin_id := parts[4]
+		description := parts[5]
+		if err := tx.Exec("INSERT INTO companies (name, social_credit_code ,memberNum, systemNum, admin_id, description) VALUES (?, ?, ?, ?, ?, ?)", name, companyCode, memberNum, systemNum, admin_id, description).Error; err != nil {
 			return fmt.Errorf("failed to insert user %s: %w", name, err)
 		}
 	}
@@ -551,9 +575,9 @@ func insertSystemInfo(t *sql.DB) error {
 		// fmt.Println("networkInfo:", networkInfo)
 
 		// 验证每个 JSON 字符串的有效性
-		//if !isValidJSON(hostInfo) || !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
-		//	return fmt.Errorf("invalid JSON data for host %s", hostName)
-		//}
+		if !isValidJSON(hostInfo) || !isValidJSON(cpuInfo) || !isValidJSON(memoryInfo) || !isValidJSON(processInfo) || !isValidJSON(networkInfo) {
+			return fmt.Errorf("invalid JSON data for host %s", hostName)
+		}
 
 		// 插入数据库（注意：这里假设数据库表 system_info 的对应字段已经设置为接受 jsonb 类型）
 		//if err := tx.Exec(
@@ -645,7 +669,7 @@ func insertHostAndToken(tx *gorm.DB) error {
 	return scanner.Err()
 }
 
-//
+// insertSSHKeys 函数从 sshkeys.txt 文件中读取 SSH 密钥数据
 func insertSSHKeys(tx *gorm.DB) error {
 	file, err := os.Open("asset/example/sshkeys.txt")
 	if err != nil {
@@ -669,8 +693,41 @@ func insertSSHKeys(tx *gorm.DB) error {
 		hostname := parts[0]
 		sshkey := parts[1]
 
-		if err := tx.Exec("INSERT INTO ssh_keys (host_name,sshkey) VALUES (?, ?)", hostname,sshkey).Error; err != nil {
+		if err := tx.Exec("INSERT INTO ssh_keys (host_name,sshkey) VALUES (?, ?)", hostname, sshkey).Error; err != nil {
 			return fmt.Errorf("failed to insert ssh_keys for %s: %w", hostname, err)
+		}
+	}
+	return scanner.Err()
+}
+
+// insertNotices 函数从 notices.txt 文件中读取通知数据
+func insertNotices(tx *gorm.DB) error {
+	file, err := os.Open("asset/example/notices.txt")
+	if err != nil {
+		return fmt.Errorf("failed to open notices file: %w", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		// 检查是否以 "//" 开头
+		if strings.HasPrefix(line, "//") {
+			fmt.Println("Encountered a comment line, exiting the loop.")
+			break // 退出循环
+		}
+		parts := strings.Split(line, ",")
+		if len(parts) < 4 {
+			return fmt.Errorf("invalid line format: %s", line)
+		}
+
+		content := parts[0]
+		send_name := parts[1]
+		recipient_name := parts[2]
+		processed := parts[3]
+
+		if err := tx.Exec("INSERT INTO notices (content,send_name,recipient_name,processed) VALUES (?, ?, ?, ?)", content, send_name, recipient_name, processed).Error; err != nil {
+			return fmt.Errorf("failed to insert notices for %s: %w", content, err)
 		}
 	}
 	return scanner.Err()
