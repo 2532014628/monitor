@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="dbc6de66-bfc9-4b8b-903a-57b2d8b1af7a" name="更改" comment="修改查询插入函数">
+      <change beforePath="$PROJECT_DIR$/frontend/Platform" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Platform" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../pkg/mod/golang.org/toolchain@v0.0.1-go1.23.8.windows-amd64" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2vUfWTIn67vYHP4E2GdxsCsotp2" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="sortKey" value="BY_TIME_DESCENDING" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go 构建.go build backend/server (1).executor&quot;: &quot;Run&quot;,
+    &quot;Go 构建.go build backend/server.executor&quot;: &quot;Debug&quot;,
+    &quot;Go 构建.servermonitor.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;test&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/goproject/src/qzcloud&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Go 构建.servermonitor">
+    <configuration name="go build backend/server" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+      <module name="servermanage" />
+      <target name="root@120.79.200.209:20024" />
+      <working_directory value="$PROJECT_DIR$/backend/server" />
+      <go_parameters value="-ldflags '-X main.Version=1112' -buildvcs=false" />
+      <envs>
+        <env name="GOARCH" value="amd64" />
+        <env name="GOOS" value="linux" />
+        <env name="GOPROXY" value="https://goproxy.cn,direct" />
+        <env name="LOCAL_DEBUG" value="flase" />
+        <env name="GO111MODULE" value="auto" />
+        <env name="CGO_ENABLED" value="1" />
+      </envs>
+      <kind value="DIRECTORY" />
+      <package value="backend/server" />
+      <directory value="$PROJECT_DIR$/backend/server" />
+      <filePath value="$PROJECT_DIR$" />
+      <option name="build_on_remote_target" value="true" />
+      <method v="2" />
+    </configuration>
+    <configuration name="servermonitor" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="servermanage" />
+      <working_directory value="$PROJECT_DIR$/backend/server" />
+      <go_parameters value="-ldflags '-X main.Version=1112' -buildvcs=false" />
+      <envs>
+        <env name="GOARCH" value="amd64" />
+        <env name="GOOS" value="linux" />
+        <env name="GOPROXY" value="https://goproxy.cn,direct" />
+        <env name="LOCAL_DEBUG" value="flase" />
+        <env name="GO111MODULE" value="auto" />
+        <env name="CGO_ENABLED" value="1" />
+      </envs>
+      <kind value="PACKAGE" />
+      <package value="backend/server" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/backend/server/main.go" />
+      <option name="build_on_remote_target" value="true" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Go 构建.go build backend/server" />
+      <item itemvalue="Go 构建.servermonitor" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go 构建.servermonitor" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-5df93f7ad4aa-df9ad98b711f-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-242.23339.24" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-GO-242.23339.24" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/test" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="添加redis缓存层，更新实时数据接口，用于图像" />
+    <MESSAGE value="修改查询插入函数" />
+    <option name="LAST_COMMIT_MESSAGE" value="修改查询插入函数" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/backend/server/handle/admin/getCompanyInfo.go</url>
+          <line>29</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
