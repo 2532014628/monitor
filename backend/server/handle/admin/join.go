@@ -95,10 +95,10 @@ func JoinCompany(c *gin.Context) {
 	//发送邀请,并提示具体情况
 	content := Username + "邀请" + input.Username + "加入" + company.Name
 	invitation := u.Notice{
-		Content:       content,
-		SendName:      Username,
-		RecipientName: input.Username,
-		Processed: false,
+		Content:	content,
+		Send:     	Username,
+		Receive: 	input.Username,
+		Processed: 	false,
 	}
 	if err := m_init.DB.Create(&invitation).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入邀请失败"})

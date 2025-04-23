@@ -34,9 +34,9 @@ type SSHKey struct {
 }
 
 type Notice struct {
-	ID            int    `json:"id" gorm:"primarykey;autoIncrement"`
-	SendName      string `json:"send_name" gorm:"column:send_name"`
-	RecipientName string `json:"recipient_name" gorm:"column:recipient_name"`
-	Content       string `json:"content" gorm:"column:content"`
-	Processed     bool   `json:"processed" gorm:"column:processed"`
+	ID            	int    `json:"id" gorm:"primarykey;autoIncrement"`
+	Send      		string `json:"send" gorm:"column:send"`
+	Receive 		string `json:"receive" gorm:"column:receive"`
+	Content       	string `json:"content" gorm:"column:content"`
+	Processed       bool   `json:"processed" gorm:"column:processed"`
 }

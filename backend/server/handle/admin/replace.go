@@ -70,15 +70,19 @@ func ReplaceAdmin(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "新管理员邮箱不匹配"})
 		return
 	}
+	if user.CompanyId != oldAdmin.CompanyId {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "新管理员和你不在一个公司"})
+		return
+	}
 	
 	//发出更换管理员申请
 	content := Username + "申请更换公司管理,新管理员姓名" + input.Realname + ",新管理员用户名" + 
 			input.Username  + ",新管理员邮箱" + input.Email
 	notice := u.Notice{
-		Content:       content,
-		SendName:      Username,
-		RecipientName: "root",
-		Processed: false,
+		Content:    content,
+		Send:      	Username,
+		Receive: 	"root",
+		Processed: 	false,
 	}
 	if err := m_init.DB.Create(&notice).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入申请失败"})

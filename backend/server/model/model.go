@@ -345,7 +345,7 @@ func InsertSSHKeys(hostname string, sshkey string) error {
 	return nil
 }
 
-func InsertNotices(sendname string,recipientname string , content string) error{
+func InsertNotices(send string,receive string , content string) error{
 	var exist bool
 	//检查users中是否存在发送者和接收者
 	querySQL := fmt.Sprintf(`
@@ -353,13 +353,13 @@ func InsertNotices(sendname string,recipientname string , content string) error{
 		SELECT 1 
 		FROM users 
 		WHERE name IN ('%s', '%s')
-	);`,sendname,recipientname)
+	);`,send,receive)
 	err := DB.QueryRow(querySQL).Scan(&exist)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("failed to query users: %v", err)
 	}
 	if !exist {
-		return fmt.Errorf("users with name '%s' or '%s' does not exist", sendname, recipientname)
+		return fmt.Errorf("users with name '%s' or '%s' does not exist", send, receive)
 	}
 
 	//检测在notices是否存在相应的通知记录
@@ -367,9 +367,9 @@ func InsertNotices(sendname string,recipientname string , content string) error{
 	SELECT EXISTS (
 		SELECT 1 
 		FROM notices 
-		WHERE send_name = '%s' AND recipient_name = '%s'
-	);`,sendname,recipientname)
-	err = DB.QueryRow(querySQL, sendname, recipientname).Scan(&exist)
+		WHERE send = '%s' AND receive = '%s'
+	);`,send,receive)
+	err = DB.QueryRow(querySQL, send, receive).Scan(&exist)
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("failed to query notices: %v", err)
 	}
@@ -380,8 +380,8 @@ func InsertNotices(sendname string,recipientname string , content string) error{
         UPDATE notices                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 		SET 
 		    content= $1,
-		WHERE send_name = $2 AND recipient_name = $3`
-		_, err= DB.Exec(updateSQL, content, sendname, recipientname)
+		WHERE send = $2 AND receive = $3`
+		_, err= DB.Exec(updateSQL, content, send, receive)
 		if err != nil {
 			fmt.Printf("Failed to update notices's content: %v\n", err)
 			return err
@@ -390,9 +390,9 @@ func InsertNotices(sendname string,recipientname string , content string) error{
 	}
 	// 插入新的记录
 	insertSQL := `
-	INSERT INTO notices (send_name, recipient_name, content)
+	INSERT INTO notices (send, receive, content)
 	VALUES ($1, $2, $3) `
-	_, err = DB.Exec(insertSQL, sendname, recipientname, content)
+	_, err = DB.Exec(insertSQL, send, receive, content)
 	if err != nil {
 		log.Fatalf("Failed to insert notices info: %v\n", err)
 		return err

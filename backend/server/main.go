@@ -123,6 +123,7 @@ func main() {
 		auth.POST("/updateUserInfo", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
+		auth.GET("/info/recivelist",info.GetReceiveList)
 
 		// 系统/公司管理员操作
 		auth.POST("/registercompany", company.Register)       //注册公司

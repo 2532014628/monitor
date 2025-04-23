@@ -95,10 +95,10 @@ func Register(c *gin.Context) {
 			 ",管理员邮箱：" + input.Admin_Email
 
 	notice := u.Notice{
-		Content:       content,
-		SendName:      username,
-		RecipientName: "root",
-		Processed: false,
+		Content:	content,
+		Send:     	username,
+		Receive: 	"root",
+		Processed: 	false,
 	}
 	if err := m_init.DB.Create(&notice).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入申请失败"})

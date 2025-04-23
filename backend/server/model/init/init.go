@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS notices (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
 	processed BOOLEAN DEFAULT FALSE,
-	send_name VARCHAR, -- REFERENCES users(name),
-	recipient_name VARCHAR, -- REFERENCES users(name),
+	send VARCHAR, -- REFERENCES users(name),
+	receive VARCHAR, -- REFERENCES users(name),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -726,7 +726,7 @@ func insertNotices(tx *gorm.DB) error {
 		recipient_name := parts[2]
 		processed := parts[3]
 
-		if err := tx.Exec("INSERT INTO notices (content,send_name,recipient_name,processed) VALUES (?, ?, ?, ?)", content, send_name, recipient_name, processed).Error; err != nil {
+		if err := tx.Exec("INSERT INTO notices (content,send,receive,processed) VALUES (?, ?, ?, ?)", content, send_name, recipient_name, processed).Error; err != nil {
 			return fmt.Errorf("failed to insert notices for %s: %w", content, err)
 		}
 	}
