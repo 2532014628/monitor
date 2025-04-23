@@ -1,3 +1,9 @@
-系统管理员邀请你加入“软件工程”,root,user1,false
-公司管理员邀请你加入“软件工程”,user1,user2,false
+user1向系统管理员申请注册“软件工程”,root,user1,processed
+user1邀请user2加入“软件工程”,user1,user2,processed
+user1邀请user3加入“软件工程”,user1,user3,processed
+user1邀请user4加入“软件工程”,user1,user4,processed
+user1邀请user5加入“软件工程”,user1,user5,processed
+user1邀请user6加入“软件工程”,user1,user6,unprocessed
+user1邀请user7加入“软件工程”,user1,user7,expired
 //通知内容，发送者，接收者,通知处理状态
+//unprocessed(未处理),processed(已处理),expired(过期)

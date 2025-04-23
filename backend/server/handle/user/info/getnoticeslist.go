@@ -24,10 +24,10 @@ func GetReceiveList(c *gin.Context) {
 	Username := username.(string)
 
 	type notice struct{
-		Send      string `json:"send"`
-		Content   string `json:"content"`
-		Processed bool   `json:"processed"`
-		CreatedAt string `json:"created_at"`
+		Send      	string `json:"send"`
+		Content   	string `json:"content"`
+		State 		string   `json:"state"`
+		CreatedAt 	string `json:"created_at"`
 	}
 
 	//获取该用户作为接收者所接收到的所有信息
@@ -65,10 +65,10 @@ func GetSendList(c *gin.Context) {
 	Username := username.(string)
 
 	type notice struct{
-		Receive   string `json:"receive"`
-		Content   string `json:"content"`
-		Processed bool   `json:"processed"`
-		CreatedAt string `json:"created_at"`
+		Receive   	string `json:"receive"`
+		Content   	string `json:"content"`
+		State 		string   `json:"state"`
+		CreatedAt 	string `json:"created_at"`
 	}
 
 	//获取该用户作为发送者所发送的所有信息

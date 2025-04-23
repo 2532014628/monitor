@@ -82,7 +82,7 @@ func ReplaceAdmin(c *gin.Context) {
 		Content:    content,
 		Send:      	Username,
 		Receive: 	"root",
-		Processed: 	false,
+		State: 		"unprocessed",
 	}
 	if err := m_init.DB.Create(&notice).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入申请失败"})

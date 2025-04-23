@@ -38,5 +38,5 @@ type Notice struct {
 	Send      		string `json:"send" gorm:"column:send"`
 	Receive 		string `json:"receive" gorm:"column:receive"`
 	Content       	string `json:"content" gorm:"column:content"`
-	Processed       bool   `json:"processed" gorm:"column:processed"`
+	State       	string `json:"state" gorm:"column:state"`
 }
