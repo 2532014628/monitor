@@ -6,6 +6,7 @@ import(
 	"net/http"
 	"gorm.io/gorm"
 	"errors"
+	"time"
 
 
 	m_init "backend/server/model/init"
@@ -63,7 +64,7 @@ func ReplaceAdmin(c *gin.Context) {
 		return
 	}
 	if user.Realname == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "新管理员未实名"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "新管理员未实名,请在个人信息中实名"})
 		return
 	}
 	if user.Email != input.Email {
@@ -76,13 +77,18 @@ func ReplaceAdmin(c *gin.Context) {
 	}
 	
 	//发出更换管理员申请
-	content := Username + "申请更换公司管理,新管理员姓名" + input.Realname + ",新管理员用户名" + 
-			input.Username  + ",新管理员邮箱" + input.Email
+	content := Username + "申请更换公司管理,新管理员姓名:" + input.Realname + ",新管理员用户名:" + 
+			input.Username  + ",新管理员邮箱:" + input.Email
+
+	const layout = "2006-01-02 15:04:05.000000"
+	createAt := time.Now().Format(layout)
+		
 	notice := u.Notice{
 		Content:    content,
 		Send:      	Username,
 		Receive: 	"root",
 		State: 		"unprocessed",
+		CreateAt: 	createAt,
 	}
 	if err := m_init.DB.Create(&notice).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入申请失败"})

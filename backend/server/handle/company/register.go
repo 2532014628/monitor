@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -77,7 +78,7 @@ func Register(c *gin.Context) {
 		return
 	}
 	if admin.Realname == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "管理员需要实名"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "管理员需要实名,请在个人信息中实名"})
 		return
 	}
 	if admin.Realname != input.Admin_Name {
@@ -94,11 +95,15 @@ func Register(c *gin.Context) {
 		",管理员:" + input.Admin_Name + ",社会信用代码:" + input.Social_Credit_Code +
 		",管理员邮箱:" + input.Admin_Email
 
+	const layout = "2006-01-02 15:04:05.000000"
+	createAt := time.Now().Format(layout)
+
 	notice := u.Notice{
 		Content: content,
 		Send:    username,
 		Receive: "root",
 		State:   "unprocessed",
+		CreateAt: createAt,
 	}
 	if err := m_init.DB.Create(&notice).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入申请失败"})

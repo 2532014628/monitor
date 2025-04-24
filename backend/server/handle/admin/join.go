@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -63,7 +64,7 @@ func JoinCompany(c *gin.Context) {
 		return
 	}
 	if user.Realname == ""{
-		c.JSON(http.StatusBadRequest, gin.H{"message": "邀请成员未实名" })
+		c.JSON(http.StatusBadRequest, gin.H{"message": "邀请成员未实名,请在个人信息中实名" })
 		return
 	}
 	if user.Realname != input.Realname{
@@ -94,6 +95,10 @@ func JoinCompany(c *gin.Context) {
 		return
 	}
 
+	const layout = "2006-01-02 15:04:05.000000"
+	createAt := time.Now().Format(layout)
+
+
 	//发送邀请,并提示具体情况
 	content := Username + "邀请" + input.Username + "加入" + company.Name
 	invitation := u.Notice{
@@ -101,6 +106,7 @@ func JoinCompany(c *gin.Context) {
 		Send:     	Username,
 		Receive: 	input.Username,
 		State: 		"unprocessed",
+		CreateAt:	createAt,
 	}
 	if err := m_init.DB.Create(&invitation).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入邀请失败"})
