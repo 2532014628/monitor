@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type User struct {
 	ID         int    `json:"id" gorm:"primarykey;autoIncrement"`
 	Name       string `json:"name" gorm:"column:name; not null"`
@@ -34,9 +36,10 @@ type SSHKey struct {
 }
 
 type Notice struct {
-	ID            	int    `json:"id" gorm:"primarykey;autoIncrement"`
-	Send      		string `json:"send" gorm:"column:send"`
-	Receive 		string `json:"receive" gorm:"column:receive"`
-	Content       	string `json:"content" gorm:"column:content"`
-	Processed       bool   `json:"processed" gorm:"column:processed"`
+	ID        int       `json:"id" gorm:"primarykey;autoIncrement"`
+	Send      string    `json:"send" gorm:"column:send"`
+	Receive   string    `json:"receive" gorm:"column:receive"`
+	Content   string    `json:"content" gorm:"column:content"`
+	Processed bool      `json:"processed" gorm:"column:processed"`
+	CreateAt  time.Time `json:"create_at" gorm:"column:created_at"`
 }

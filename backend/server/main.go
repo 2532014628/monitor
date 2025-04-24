@@ -124,6 +124,7 @@ func main() {
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
 		auth.GET("/info/recivelist",info.GetReceiveList)
+		auth.POST("/info/manage", info.ManageNotice)
 
 		// 系统/公司管理员操作
 		auth.POST("/registercompany", company.Register)       //注册公司
