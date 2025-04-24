@@ -18,6 +18,7 @@ func ManageNotice(c *gin.Context) {
 		c.JSON(401, gin.H{
 			"message": "用户未登录",
 		})
+		return
 	}
 	username := Username.(string)
 
@@ -35,7 +36,8 @@ func ManageNotice(c *gin.Context) {
 	}
 
 	var notice m_user.Notice
-	if strings.Contains(notice.Content, "注册") && strings.Contains(notice.Content, "申请") { // 处理注册公司的申请
+	// 处理注册公司的申请时的权限判断
+	if notice.Receive == "root" && strings.Contains(notice.Content, "注册") && strings.Contains(notice.Content, "申请") {
 		// 判断是否有权限
 		var user m_user.User
 		if err := m_init.DB.Where("name = ?", username).First(&user).Error; err != nil {
@@ -49,7 +51,7 @@ func ManageNotice(c *gin.Context) {
 	}
 
 	// 获取消息
-	err = m_init.DB.Where("receive = ? and send = ? and created_at = ?",
+	err = m_init.DB.Where("send = ? and receive = ? and created_at = ?",
 		requestBody.Send, requestBody.Receive, requestBody.CreateAt).First(&notice).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -61,15 +63,21 @@ func ManageNotice(c *gin.Context) {
 		}
 	}
 
+	// 判断send是否为当前用户
+	if notice.Receive != username {
+		c.JSON(http.StatusForbidden, gin.H{"message": "这不是您收到的消息，您没有权限处理该消息"})
+		return
+	}
+
 	// 判断消息是否已过期
-	if notice.Processed == "expired" {
+	if notice.State == "expired" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "消息已过期"})
 		return
 	}
 
 	// 修改消息状态
-	err = m_init.DB.Model(&m_user.User{}).Where("id = ?", notice.ID).
-		Update(map[string]interface{}{"processed": "processed"}).Error
+	err = m_init.DB.Model(&m_user.Notice{}).Where("id = ?", notice.ID).
+		Updates(map[string]interface{}{"state": "processed"}).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "更新消息的处理状态失败"})
 		return

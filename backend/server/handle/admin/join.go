@@ -98,7 +98,7 @@ func JoinCompany(c *gin.Context) {
 		Content:	content,
 		Send:     	Username,
 		Receive: 	input.Username,
-		Processed: 	false,
+		State: 		"unprocessed",
 	}
 	if err := m_init.DB.Create(&invitation).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入邀请失败"})

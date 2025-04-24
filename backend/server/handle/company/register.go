@@ -20,7 +20,7 @@ type RegisterRequest struct {
 	Admin_Email        string `json:"admin_email"`
 }
 
-//邀请团队
+// 邀请团队
 func Register(c *gin.Context) {
 
 	Username, exists := c.Get("username")
@@ -53,10 +53,10 @@ func Register(c *gin.Context) {
 	}
 
 	//简单检查社会信用代码格式是否正确
-	if len(input.Social_Credit_Code) != 18 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "社会信用代码应该为18位"})
-		return
-	}
+	//if len(input.Social_Credit_Code) != 18 {
+	//	c.JSON(http.StatusBadRequest, gin.H{"message": "社会信用代码应该为18位"})
+	//	return
+	//}
 	//检测公司统一社会信用代码是否已经存在
 	if err := m_init.DB.Where("social_credit_code = ?", input.Social_Credit_Code).First(&company).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "公司统一社会信用代码已存在"})
@@ -76,11 +76,11 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库查询用户失败"})
 		return
 	}
-	if admin.Realname == ""{
+	if admin.Realname == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "管理员需要实名"})
 		return
 	}
-	if admin.Realname != input.Admin_Name{
+	if admin.Realname != input.Admin_Name {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "管理员实名信息不匹配"})
 		return
 	}
@@ -89,16 +89,16 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	//发虚邀请团队申请
-	content := username + "申请注册公司" + input.Company + "，法人：" + input.Legal_Name +
-			 ",管理员：" + input.Admin_Name + ",社会信用代码：" + input.Social_Credit_Code +
-			 ",管理员邮箱：" + input.Admin_Email
+	//团队申请
+	content := username + "申请注册公司:" + input.Company + "，法人：" + input.Legal_Name +
+		",管理员:" + input.Admin_Name + ",社会信用代码:" + input.Social_Credit_Code +
+		",管理员邮箱:" + input.Admin_Email
 
 	notice := u.Notice{
-		Content:	content,
-		Send:     	username,
-		Receive: 	"root",
-		Processed: 	false,
+		Content: content,
+		Send:    username,
+		Receive: "root",
+		State:   "unprocessed",
 	}
 	if err := m_init.DB.Create(&notice).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "数据库插入申请失败"})
@@ -106,7 +106,7 @@ func Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "发出邀请团队申请",
+		"message": "发出团队申请",
 	})
 
 	//创建公司

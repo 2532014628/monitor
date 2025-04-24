@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS ssh_keys (
 CREATE TABLE IF NOT EXISTS notices (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
-	processed BOOLEAN DEFAULT FALSE,
+	state VARCHAR DEFAULT 'unprocessed' ,
 	send VARCHAR, -- REFERENCES users(name),
 	receive VARCHAR, -- REFERENCES users(name),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -716,17 +716,17 @@ func insertNotices(tx *gorm.DB) error {
 			fmt.Println("Encountered a comment line, exiting the loop.")
 			break // 退出循环
 		}
-		parts := strings.Split(line, ",")
+		parts := strings.Split(line, ",,")
 		if len(parts) < 4 {
 			return fmt.Errorf("invalid line format: %s", line)
 		}
 
 		content := parts[0]
-		send_name := parts[1]
-		recipient_name := parts[2]
-		processed := parts[3]
+		send := parts[1]
+		receive := parts[2]
+		state := parts[3]
 
-		if err := tx.Exec("INSERT INTO notices (content,send,receive,processed) VALUES (?, ?, ?, ?)", content, send_name, recipient_name, processed).Error; err != nil {
+		if err := tx.Exec("INSERT INTO notices (content,send,receive,state) VALUES (?, ?, ?, ?)", content, send, receive, state).Error; err != nil {
 			return fmt.Errorf("failed to insert notices for %s: %w", content, err)
 		}
 	}

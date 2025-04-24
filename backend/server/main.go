@@ -14,10 +14,11 @@ import (
 	db "backend/server/model/init"
 	"backend/server/redis"
 
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"os"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -123,8 +124,9 @@ func main() {
 		auth.POST("/updateUserInfo", update.UpdateUserInfo)
 		router.POST("/reset_password", update.ResetPassword)
 		auth.POST("/request_reset_password", update.RequestResetPassword)
-		auth.GET("/info/recivelist",info.GetReceiveList)
-		auth.POST("/info/manage", info.ManageNotice)
+		auth.GET("/info/recivelist", info.GetReceiveList) //获取该用户作为接收者所接收到的所有信息
+		auth.GET("/info/sendlist", info.GetSendList)      //获取该用户作为发送者所发送的所有信息
+		auth.POST("/info/manage", info.ManageNotice)       //处理通知状态
 
 		// 系统/公司管理员操作
 		auth.POST("/registercompany", company.Register)       //注册公司
@@ -134,8 +136,8 @@ func main() {
 		auth.GET("/get-company-info", admin.GetCompanyInfo)   // 指定公司的信息（含成员信息）
 		auth.GET("/get-company-list", company.GetCompanyList) // 公司列表
 		auth.POST("/sshkey", admin.AddSShkey)                 // 添加SSH密钥
-		auth.POST("/joincompany", admin.JoinCompany) 		  // 邀请成员加入公司
-		auth.POST("/replaceadmin",admin.ReplaceAdmin)		  // 更换管理员
+		auth.POST("/joincompany", admin.JoinCompany)          // 邀请成员加入公司
+		auth.POST("/replaceadmin", admin.ReplaceAdmin)        // 更换管理员
 
 		// 监控
 		auth.POST("/install", install.InstallAgent)
