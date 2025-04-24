@@ -29,11 +29,11 @@ func ManageNotice(c *gin.Context) {
 		return
 	}
 
-	mode := c.Query("mode")
-	if mode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "缺少mode"})
-		return
-	}
+	// mode := c.Query("mode")
+	// if mode == "" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"message": "缺少mode"})
+	// 	return
+	// }
 
 	var notice m_user.Notice
 	// 处理注册公司的申请时的权限判断
@@ -51,8 +51,12 @@ func ManageNotice(c *gin.Context) {
 	}
 
 	// 获取消息
-	err = m_init.DB.Where("send = ? and receive = ? and created_at = ?",
-		requestBody.Send, requestBody.Receive, requestBody.CreateAt).First(&notice).Error
+	if requestBody.ID != 0 {
+		err = m_init.DB.Where("id = ?", requestBody.ID).First(&notice).Error // 有传id时，优先使用id查询
+	} else { // 没有传id时，使用其他字段查询
+		err = m_init.DB.Where("send = ? and receive =? and created_at =?", requestBody.Send, requestBody.Receive, requestBody.CreateAt).First(&notice).Error
+	}
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"message": "找不到该消息"})
@@ -63,7 +67,7 @@ func ManageNotice(c *gin.Context) {
 		}
 	}
 
-	// 判断send是否为当前用户
+	// 判断receive是否为当前用户
 	if notice.Receive != username {
 		c.JSON(http.StatusForbidden, gin.H{"message": "这不是您收到的消息，您没有权限处理该消息"})
 		return

@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	m_init "backend/server/model/init"
-	//u "backend/server/model/user"
+	u "backend/server/model/user"
 )
 
 //获取该用户作为接收者所接收到的所有信息
@@ -23,15 +23,15 @@ func GetReceiveList(c *gin.Context) {
 	}
 	Username := username.(string)
 
-	type notice struct{
-		Send      	string `json:"send"`
-		Content   	string `json:"content"`
-		State 		string   `json:"state"`
-		CreatedAt 	string `json:"created_at"`
-	}
+	// type notice struct{
+	// 	Send      	string `json:"send"`
+	// 	Content   	string `json:"content"`
+	// 	State 		string   `json:"state"`
+	// 	CreatedAt 	string `json:"created_at"`
+	// }
 
 	//获取该用户作为接收者所接收到的所有信息
-	var receiveNotices []notice
+	var receiveNotices []u.Notice
 	err := m_init.DB.Where("receive = ?", Username).Find(&receiveNotices).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -64,15 +64,15 @@ func GetSendList(c *gin.Context) {
 	}
 	Username := username.(string)
 
-	type notice struct{
-		Receive   	string `json:"receive"`
-		Content   	string `json:"content"`
-		State 		string   `json:"state"`
-		CreatedAt 	string `json:"created_at"`
-	}
+	// type notice struct{
+	// 	Receive   	string `json:"receive"`
+	// 	Content   	string `json:"content"`
+	// 	State 		string   `json:"state"`
+	// 	CreatedAt 	string `json:"created_at"`
+	// }
 
 	//获取该用户作为发送者所发送的所有信息
-	var sendNotices []notice
+	var sendNotices []u.Notice
 	err := m_init.DB.Where("send = ?", Username).Find(&sendNotices).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
