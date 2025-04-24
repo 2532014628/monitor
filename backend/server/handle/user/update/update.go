@@ -40,6 +40,7 @@ func UpdateUserInfo(c *gin.Context) {
 		NewName     string `json:"new_name"`
 		NewPassword string `json:"new_password"`
 		Email       string `json:"new_email"`
+		RealName    string `json:"realname"`
 	}
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "请求数据格式错误", "error": err.Error()})
@@ -78,6 +79,15 @@ func UpdateUserInfo(c *gin.Context) {
 		// 执行邮箱更新操作
 		if err := m_init.DB.Model(&u.User{}).Where("name =?", username).Updates(map[string]interface{}{"email": request.Email}).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "更新邮箱失败", "error": err.Error()})
+		}
+	}
+
+	// 检查是否传入真实姓名
+	if request.RealName != "" {
+		// 执行真实姓名更新操作
+		if err := m_init.DB.Model(&u.User{}).Where("name =?", username).Updates(map[string]interface{}{"realname": request.RealName}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "更新真实姓名失败", "error": err.Error()})
+			return
 		}
 	}
 

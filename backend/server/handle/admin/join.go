@@ -64,9 +64,11 @@ func JoinCompany(c *gin.Context) {
 	}
 	if user.Realname == ""{
 		c.JSON(http.StatusBadRequest, gin.H{"message": "邀请成员未实名" })
+		return
 	}
 	if user.Realname != input.Realname{
 		c.JSON(http.StatusBadRequest, gin.H{"message": "邀请成员真实姓名不匹配"})
+		return
 	}
 
 	//查找要邀请人是否还在其他公司就职
