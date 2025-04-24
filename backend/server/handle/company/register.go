@@ -90,7 +90,7 @@ func Register(c *gin.Context) {
 	}
 
 	//团队申请
-	content := username + "申请注册公司:" + input.Company + "，法人：" + input.Legal_Name +
+	content := username + "申请注册公司:" + input.Company + "，法人:" + input.Legal_Name +
 		",管理员:" + input.Admin_Name + ",社会信用代码:" + input.Social_Credit_Code +
 		",管理员邮箱:" + input.Admin_Email
 
