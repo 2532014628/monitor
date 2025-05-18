@@ -1,0 +1,163 @@
+# 忽略操作系统生成的文件
+.DS_Store
+Thumbs.db
+
+# 忽略IDE和编辑器生成的文件
+*.sum
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.log
+*.class
+*.pyc
+*.pyo
+*.egg-info/
+__pycache__/
+
+# 忽略构建和编译输出
+.idea
+.idea/
+.vscode/
+dist/
+build/
+out/
+target/
+*.sum
+*.jar
+*.war
+*.class
+*.so
+*.dll
+*.exe
+*.obj
+*.o
+*.a
+*.lib
+*.pdb
+
+# 忽略虚拟环境
+venv/
+.virtualenv/
+env/
+.venv/
+
+# 忽略Node.js相关文件
+node_modules/
+yarn.lock
+package-lock.json
+
+# 忽略Go相关文件
+*.out
+*.test
+*.prof
+*.race
+*.test.out
+*.coverprofile
+*.pb.go
+*.pb.gw.go
+*.pb.validate.go
+*.pb.grpc.gateway.go
+*.pb.twirp.go
+*.pb.json.go
+*.pb.gw.json.go
+*.pb.gw.pb.go
+*.pb.gw.pb.json.go
+*.pb.gw.pb.validate.go
+*.pb.gw.pb.grpc.gateway.go
+*.pb.gw.pb.twirp.go
+*.pb.gw.pb.gw.json.go
+*.pb.gw.pb.gw.pb.go
+*.pb.gw.pb.gw.pb.json.go
+*.pb.gw.pb.gw.pb.validate.go
+*.pb.gw.pb.gw.pb.grpc.gateway.go
+*.pb.gw.pb.gw.pb.twirp.go
+
+# 忽略Docker相关文件
+*.conf
+.dockerignore
+.docker/
+.docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+Dockerfile.*
+
+# 忽略日志文件
+logs/
+
+# 忽略配置文件
+config.jsonya
+.env
+*.env
+*.env.local
+*.env.example
+*.yaml
+
+# 忽略缓存文件
+.cache/
+.cachedir/
+.cache/
+*.cache
+
+# 忽略临时文件
+*.tmp
+*.bak
+
+# 忽略测试输出
+coverage/
+*.coverage
+*.cover
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+*.tox
+*.pytest_cache/
+
+# 忽略IDE和编辑器生成的文件
+.vscode/
+.idea/
+*.xml
+*.iml
+*.ipynb_checkpoints/
+*.swp
+*.swo
+*.swn
+*.lock
+
+# 忽略其他特定文件
+*.md5
+*.sha1
+*.sha256
+*.sha512
+*.sig
+*.asc
+*.key
+*.pem
+*.crt
+*.csrgit
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.der
+*.pem
+*.crt
+*.key
+*.p12
+*.pfx
+*.der
+*.pem
+*.crt
+*.key
+*.p12
+*.pfx
+*.der
+
+# 忽略测试目录
+oss_test/
+tdengine_test/
+.idea/material_theme_project_new.xml
+.idea/servermanage.iml
+frontend/logs/*.log
