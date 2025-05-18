@@ -1,2 +1,0 @@
-1,admin,Administrator
-2,user,Regular User

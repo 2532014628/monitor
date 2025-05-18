@@ -1,0 +1,151 @@
+syntax = "proto3";
+
+package monitor;
+
+option go_package = "monitor-server/proto";
+
+// 系统信息采集服务
+service MonitorService {
+  // 安装agent
+  rpc InstallAgent(InstallAgentRequest) returns (InstallAgentResponse) {}
+  
+  // 获取系统信息
+  rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {}
+  
+  // 获取最新的系统信息
+  rpc GetLastSystemInfo(GetLastSystemInfoRequest) returns (GetLastSystemInfoResponse) {}
+  
+  // 获取agent列表
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse) {}
+  
+  // 检查服务器状态
+  rpc CheckServerStatus(CheckServerStatusRequest) returns (CheckServerStatusResponse) {}
+}
+
+// 安装agent请求
+message InstallAgentRequest {
+  string host = 1;
+  string user = 2;
+  string password = 3;
+  int32 port = 4;
+  string host_name = 5;
+  string os = 6;
+  string platform = 7;
+  string kernel_arch = 8;
+  string token = 9;
+}
+
+// 安装agent响应
+message InstallAgentResponse {
+  bool success = 1;
+  string message = 2;
+  string token = 3;
+}
+
+// 获取系统信息请求
+message GetSystemInfoRequest {
+  string hostname = 1;
+  string from = 2;
+  string to = 3;
+}
+
+// 获取系统信息响应
+message GetSystemInfoResponse {
+  SystemInfo info = 1;
+}
+
+// 获取最新系统信息请求
+message GetLastSystemInfoRequest {
+  string hostname = 1;
+}
+
+// 获取最新系统信息响应
+message GetLastSystemInfoResponse {
+  SystemInfo info = 1;
+}
+
+// 获取agent列表请求
+message ListAgentsRequest {}
+
+// 获取agent列表响应
+message ListAgentsResponse {
+  repeated AgentInfo agents = 1;
+}
+
+// 检查服务器状态请求
+message CheckServerStatusRequest {
+  string hostname = 1;
+}
+
+// 检查服务器状态响应
+message CheckServerStatusResponse {
+  bool online = 1;
+  string last_heartbeat = 2;
+}
+
+// 系统信息
+message SystemInfo {
+  HostInfo host_info = 1;
+  repeated CPUInfo cpu_info = 2;
+  MemoryInfo memory_info = 3;
+  repeated ProcessInfo process_info = 4;
+  repeated NetworkInfo network_info = 5;
+}
+
+// 主机信息
+message HostInfo {
+  int32 id = 1;
+  string host_name = 2;
+  string os = 3;
+  string platform = 4;
+  string kernel_arch = 5;
+  string created_at = 6;
+}
+
+// CPU信息
+message CPUInfo {
+  int32 id = 1;
+  string model_name = 2;
+  int32 cores_num = 3;
+  double percent = 4;
+  string created_at = 5;
+}
+
+// 内存信息
+message MemoryInfo {
+  int32 id = 1;
+  string total = 2;
+  string available = 3;
+  string used = 4;
+  string free = 5;
+  double user_percent = 6;
+  string created_at = 7;
+}
+
+// 进程信息
+message ProcessInfo {
+  int32 id = 1;
+  int32 pid = 2;
+  double cpu_percent = 3;
+  double mem_percent = 4;
+  string created_at = 5;
+}
+
+// 网络信息
+message NetworkInfo {
+  int32 id = 1;
+  string name = 2;
+  uint64 bytes_recv = 3;
+  uint64 bytes_sent = 4;
+  string created_at = 5;
+}
+
+// Agent信息
+message AgentInfo {
+  string host_name = 1;
+  string os = 2;
+  string platform = 3;
+  string kernel_arch = 4;
+  string status = 5;
+  string last_heartbeat = 6;
+} 
