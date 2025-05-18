@@ -5,7 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dbc6de66-bfc9-4b8b-903a-57b2d8b1af7a" name="更改" comment="修改查询插入函数">
-      <change beforePath="$PROJECT_DIR$/frontend/Platform" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Platform" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/servermanage.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/servermanage.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/asset/example/notices.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/asset/example/notices.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/config/configs/config.yaml.example" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/config/configs/config.yaml.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/agent/install/install.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/agent/install/install.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/server/monitor/getagentinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/server/monitor/getagentinfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/handle/server/monitor/getlastagentinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/handle/server/monitor/getlastagentinfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/model/model.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/model/model.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/server/redis/clear.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/server/redis/clear.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend" beforeDir="false" afterPath="$PROJECT_DIR$/frontend" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,7 +29,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../pkg/mod/golang.org/toolchain@v0.0.1-go1.23.8.windows-amd64" />
+  <component name="GOROOT" url="file://$PROJECT_DIR$/../../pkg/mod/golang.org/toolchain@v0.0.1-go1.23.9.windows-amd64" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -39,26 +49,31 @@
     <option name="showLibraryContents" value="true" />
     <option name="sortKey" value="BY_TIME_DESCENDING" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;Go 构建.go build backend/server (1).executor&quot;: &quot;Run&quot;,
-    &quot;Go 构建.go build backend/server.executor&quot;: &quot;Debug&quot;,
-    &quot;Go 构建.servermonitor.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;test&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/goproject/src/qzcloud&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go 构建.go build backend/server (1).executor": "Run",
+    "Go 构建.go build backend/server.executor": "Debug",
+    "Go 构建.servermonitor.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "test",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "D:/goproject/src/servermanage/monitor-server",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\goproject\src\servermanage\backend\monitor-server\internal\handle" />
+    </key>
+  </component>
   <component name="RunManager" selected="Go 构建.servermonitor">
     <configuration name="go build backend/server" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="servermanage" />

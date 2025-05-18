@@ -1,0 +1,16 @@
+redis:
+  host: redis
+  port: "6379"
+  password: ""
+  db: "0"
+tdengine: #TDengine数据库配置
+    host: tdengine # tdengine服务器端地址
+    port: "6030"   # 数据库端口
+    name: servermonitor # 数据库名
+    user: root    # 数据库用户名
+    password: taosdata # 数据库密码
+grpc:
+    port: "50051"
+server:
+    port: "8081"
+    
