@@ -44,3 +44,25 @@ func (s *MonitorService) GetLastSystemInfo(ctx context.Context, req *pb.GetLastS
 		Info: info,
 	}, nil
 }
+
+// GetHostLastUpdateTime 获取主机最后更新时间
+func (s *MonitorService) GetHostLastUpdateTime(ctx context.Context, req *pb.GetHostLastUpdateTimeRequest) (*pb.GetHostLastUpdateTimeResponse, error) {
+	// 构建 Redis key
+	key := "host:" + req.Hostname
+
+	// 从 Redis 获取最后更新时间
+	lastUpdatedStr, err := s.redisRepo.GetLastUpdateTime(ctx, key)
+	if err != nil {
+		if err == repository.ErrKeyNotFound {
+			return &pb.GetHostLastUpdateTimeResponse{
+				Exists: false,
+			}, nil
+		}
+		return nil, err
+	}
+
+	return &pb.GetHostLastUpdateTimeResponse{
+		LastUpdated: lastUpdatedStr,
+		Exists:      true,
+	}, nil
+}

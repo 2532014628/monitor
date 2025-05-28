@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MonitorService_InstallAgent_FullMethodName      = "/monitor.MonitorService/InstallAgent"
-	MonitorService_GetSystemInfo_FullMethodName     = "/monitor.MonitorService/GetSystemInfo"
-	MonitorService_GetLastSystemInfo_FullMethodName = "/monitor.MonitorService/GetLastSystemInfo"
-	MonitorService_ListAgents_FullMethodName        = "/monitor.MonitorService/ListAgents"
-	MonitorService_CheckServerStatus_FullMethodName = "/monitor.MonitorService/CheckServerStatus"
+	MonitorService_InstallAgent_FullMethodName          = "/monitor.MonitorService/InstallAgent"
+	MonitorService_GetSystemInfo_FullMethodName         = "/monitor.MonitorService/GetSystemInfo"
+	MonitorService_GetLastSystemInfo_FullMethodName     = "/monitor.MonitorService/GetLastSystemInfo"
+	MonitorService_ListAgents_FullMethodName            = "/monitor.MonitorService/ListAgents"
+	MonitorService_CheckServerStatus_FullMethodName     = "/monitor.MonitorService/CheckServerStatus"
+	MonitorService_GetHostLastUpdateTime_FullMethodName = "/monitor.MonitorService/GetHostLastUpdateTime"
 )
 
 // MonitorServiceClient is the client API for MonitorService service.
@@ -42,6 +43,8 @@ type MonitorServiceClient interface {
 	ListAgents(ctx context.Context, in *ListAgentsRequest, opts ...grpc.CallOption) (*ListAgentsResponse, error)
 	// 检查服务器状态
 	CheckServerStatus(ctx context.Context, in *CheckServerStatusRequest, opts ...grpc.CallOption) (*CheckServerStatusResponse, error)
+	// 获取主机最后更新时间
+	GetHostLastUpdateTime(ctx context.Context, in *GetHostLastUpdateTimeRequest, opts ...grpc.CallOption) (*GetHostLastUpdateTimeResponse, error)
 }
 
 type monitorServiceClient struct {
@@ -102,6 +105,16 @@ func (c *monitorServiceClient) CheckServerStatus(ctx context.Context, in *CheckS
 	return out, nil
 }
 
+func (c *monitorServiceClient) GetHostLastUpdateTime(ctx context.Context, in *GetHostLastUpdateTimeRequest, opts ...grpc.CallOption) (*GetHostLastUpdateTimeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHostLastUpdateTimeResponse)
+	err := c.cc.Invoke(ctx, MonitorService_GetHostLastUpdateTime_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MonitorServiceServer is the server API for MonitorService service.
 // All implementations must embed UnimplementedMonitorServiceServer
 // for forward compatibility.
@@ -118,6 +131,8 @@ type MonitorServiceServer interface {
 	ListAgents(context.Context, *ListAgentsRequest) (*ListAgentsResponse, error)
 	// 检查服务器状态
 	CheckServerStatus(context.Context, *CheckServerStatusRequest) (*CheckServerStatusResponse, error)
+	// 获取主机最后更新时间
+	GetHostLastUpdateTime(context.Context, *GetHostLastUpdateTimeRequest) (*GetHostLastUpdateTimeResponse, error)
 	mustEmbedUnimplementedMonitorServiceServer()
 }
 
@@ -142,6 +157,9 @@ func (UnimplementedMonitorServiceServer) ListAgents(context.Context, *ListAgents
 }
 func (UnimplementedMonitorServiceServer) CheckServerStatus(context.Context, *CheckServerStatusRequest) (*CheckServerStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckServerStatus not implemented")
+}
+func (UnimplementedMonitorServiceServer) GetHostLastUpdateTime(context.Context, *GetHostLastUpdateTimeRequest) (*GetHostLastUpdateTimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHostLastUpdateTime not implemented")
 }
 func (UnimplementedMonitorServiceServer) mustEmbedUnimplementedMonitorServiceServer() {}
 func (UnimplementedMonitorServiceServer) testEmbeddedByValue()                        {}
@@ -254,6 +272,24 @@ func _MonitorService_CheckServerStatus_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MonitorService_GetHostLastUpdateTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHostLastUpdateTimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MonitorServiceServer).GetHostLastUpdateTime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MonitorService_GetHostLastUpdateTime_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MonitorServiceServer).GetHostLastUpdateTime(ctx, req.(*GetHostLastUpdateTimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MonitorService_ServiceDesc is the grpc.ServiceDesc for MonitorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,6 +316,10 @@ var MonitorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckServerStatus",
 			Handler:    _MonitorService_CheckServerStatus_Handler,
+		},
+		{
+			MethodName: "GetHostLastUpdateTime",
+			Handler:    _MonitorService_GetHostLastUpdateTime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

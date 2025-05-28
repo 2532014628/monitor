@@ -17,6 +17,7 @@ func SetupRouter(repo *repository.RedisRepository) *gin.Engine {
 		systemGroup.POST("/metrics", func(c *gin.Context) {
 			ReceiveAndStoreSystemMetrics(c, repo)
 		})
+
 	}
 
 	return r

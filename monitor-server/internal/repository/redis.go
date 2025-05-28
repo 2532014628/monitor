@@ -11,6 +11,11 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// 定义错误
+var (
+	ErrKeyNotFound = fmt.Errorf("key not found")
+)
+
 type RedisRepository struct {
 	client *redis.Client
 }
@@ -123,4 +128,18 @@ func (r *RedisRepository) AddSystemInfo(ctx context.Context, request RequestData
 		return fmt.Errorf("failed to insert data into Redis: %s", err)
 	}
 	return nil
+}
+
+// GetLastUpdateTime 获取主机的最后更新时间
+func (r *RedisRepository) GetLastUpdateTime(ctx context.Context, key string) (string, error) {
+	// 获取主机的最后更新时间
+	lastUpdatedStr, err := r.client.HGet(ctx, key, "last_updated").Result()
+	if err != nil {
+		if err == redis.Nil {
+			return "", ErrKeyNotFound
+		}
+		return "", fmt.Errorf("获取最后更新时间失败: %v", err)
+	}
+
+	return lastUpdatedStr, nil
 }

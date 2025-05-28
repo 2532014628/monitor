@@ -20,6 +20,9 @@ service MonitorService {
   
   // 检查服务器状态
   rpc CheckServerStatus(CheckServerStatusRequest) returns (CheckServerStatusResponse) {}
+
+  // 获取主机最后更新时间
+  rpc GetHostLastUpdateTime(GetHostLastUpdateTimeRequest) returns (GetHostLastUpdateTimeResponse) {}
 }
 
 // 安装agent请求
@@ -148,4 +151,15 @@ message AgentInfo {
   string kernel_arch = 4;
   string status = 5;
   string last_heartbeat = 6;
+}
+
+// 获取主机最后更新时间请求
+message GetHostLastUpdateTimeRequest {
+  string hostname = 1;
+}
+
+// 获取主机最后更新时间响应
+message GetHostLastUpdateTimeResponse {
+  string last_updated = 1;  // 使用 RFC3339 格式的时间字符串
+  bool exists = 2;          // 主机是否存在
 } 

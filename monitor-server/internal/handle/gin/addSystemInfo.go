@@ -11,12 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type RequestData struct {
-	HostInfo *model.HostInfo      `json:"host_info"`
-	CPUInfo  []*model.CPUInfo     `json:"cpu_info"`
-	MemInfo  *model.MemoryInfo    `json:"memory_info"`
-	NetInfo  []*model.NetworkInfo `json:"network_info"`
-}
+
 
 func ReceiveAndStoreSystemMetrics(c *gin.Context, repo *repository.RedisRepository) {
 	// 解析请求数据
