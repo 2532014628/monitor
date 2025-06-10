@@ -32,7 +32,9 @@ type InstallAgentRequest struct {
 	Os            string                 `protobuf:"bytes,6,opt,name=os,proto3" json:"os,omitempty"`
 	Platform      string                 `protobuf:"bytes,7,opt,name=platform,proto3" json:"platform,omitempty"`
 	KernelArch    string                 `protobuf:"bytes,8,opt,name=kernel_arch,json=kernelArch,proto3" json:"kernel_arch,omitempty"`
-	Token         string                 `protobuf:"bytes,9,opt,name=token,proto3" json:"token,omitempty"`
+	MemThreshold  float32                `protobuf:"fixed32,9,opt,name=mem_threshold,json=memThreshold,proto3" json:"mem_threshold,omitempty"`
+	CpuThreshold  float32                `protobuf:"fixed32,10,opt,name=cpu_threshold,json=cpuThreshold,proto3" json:"cpu_threshold,omitempty"`
+	Token         string                 `protobuf:"bytes,11,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -123,6 +125,20 @@ func (x *InstallAgentRequest) GetKernelArch() string {
 	return ""
 }
 
+func (x *InstallAgentRequest) GetMemThreshold() float32 {
+	if x != nil {
+		return x.MemThreshold
+	}
+	return 0
+}
+
+func (x *InstallAgentRequest) GetCpuThreshold() float32 {
+	if x != nil {
+		return x.CpuThreshold
+	}
+	return 0
+}
+
 func (x *InstallAgentRequest) GetToken() string {
 	if x != nil {
 		return x.Token
@@ -191,6 +207,136 @@ func (x *InstallAgentResponse) GetToken() string {
 	return ""
 }
 
+// 删除agent请求
+type UninstallAgentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Host          string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	User          string                 `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Port          int32                  `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	Hostname      string                 `protobuf:"bytes,5,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UninstallAgentRequest) Reset() {
+	*x = UninstallAgentRequest{}
+	mi := &file_proto_monitor_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UninstallAgentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UninstallAgentRequest) ProtoMessage() {}
+
+func (x *UninstallAgentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_monitor_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UninstallAgentRequest.ProtoReflect.Descriptor instead.
+func (*UninstallAgentRequest) Descriptor() ([]byte, []int) {
+	return file_proto_monitor_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UninstallAgentRequest) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *UninstallAgentRequest) GetUser() string {
+	if x != nil {
+		return x.User
+	}
+	return ""
+}
+
+func (x *UninstallAgentRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *UninstallAgentRequest) GetPort() int32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *UninstallAgentRequest) GetHostname() string {
+	if x != nil {
+		return x.Hostname
+	}
+	return ""
+}
+
+// 删除agent响应
+type UninstallAgentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UninstallAgentResponse) Reset() {
+	*x = UninstallAgentResponse{}
+	mi := &file_proto_monitor_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UninstallAgentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UninstallAgentResponse) ProtoMessage() {}
+
+func (x *UninstallAgentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_monitor_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UninstallAgentResponse.ProtoReflect.Descriptor instead.
+func (*UninstallAgentResponse) Descriptor() ([]byte, []int) {
+	return file_proto_monitor_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UninstallAgentResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UninstallAgentResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 // 获取系统信息请求
 type GetSystemInfoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -203,7 +349,7 @@ type GetSystemInfoRequest struct {
 
 func (x *GetSystemInfoRequest) Reset() {
 	*x = GetSystemInfoRequest{}
-	mi := &file_proto_monitor_proto_msgTypes[2]
+	mi := &file_proto_monitor_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -215,7 +361,7 @@ func (x *GetSystemInfoRequest) String() string {
 func (*GetSystemInfoRequest) ProtoMessage() {}
 
 func (x *GetSystemInfoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[2]
+	mi := &file_proto_monitor_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -228,7 +374,7 @@ func (x *GetSystemInfoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSystemInfoRequest.ProtoReflect.Descriptor instead.
 func (*GetSystemInfoRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{2}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetSystemInfoRequest) GetHostname() string {
@@ -262,7 +408,7 @@ type GetSystemInfoResponse struct {
 
 func (x *GetSystemInfoResponse) Reset() {
 	*x = GetSystemInfoResponse{}
-	mi := &file_proto_monitor_proto_msgTypes[3]
+	mi := &file_proto_monitor_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -274,7 +420,7 @@ func (x *GetSystemInfoResponse) String() string {
 func (*GetSystemInfoResponse) ProtoMessage() {}
 
 func (x *GetSystemInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[3]
+	mi := &file_proto_monitor_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -287,7 +433,7 @@ func (x *GetSystemInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSystemInfoResponse.ProtoReflect.Descriptor instead.
 func (*GetSystemInfoResponse) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{3}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetSystemInfoResponse) GetInfo() *SystemInfo {
@@ -307,7 +453,7 @@ type GetLastSystemInfoRequest struct {
 
 func (x *GetLastSystemInfoRequest) Reset() {
 	*x = GetLastSystemInfoRequest{}
-	mi := &file_proto_monitor_proto_msgTypes[4]
+	mi := &file_proto_monitor_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -319,7 +465,7 @@ func (x *GetLastSystemInfoRequest) String() string {
 func (*GetLastSystemInfoRequest) ProtoMessage() {}
 
 func (x *GetLastSystemInfoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[4]
+	mi := &file_proto_monitor_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -332,7 +478,7 @@ func (x *GetLastSystemInfoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLastSystemInfoRequest.ProtoReflect.Descriptor instead.
 func (*GetLastSystemInfoRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{4}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetLastSystemInfoRequest) GetHostname() string {
@@ -346,13 +492,14 @@ func (x *GetLastSystemInfoRequest) GetHostname() string {
 type GetLastSystemInfoResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Info          *SystemInfo            `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
+	AlertMessage  string                 `protobuf:"bytes,2,opt,name=alert_message,json=alertMessage,proto3" json:"alert_message,omitempty"` // 告警信息
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetLastSystemInfoResponse) Reset() {
 	*x = GetLastSystemInfoResponse{}
-	mi := &file_proto_monitor_proto_msgTypes[5]
+	mi := &file_proto_monitor_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -364,7 +511,7 @@ func (x *GetLastSystemInfoResponse) String() string {
 func (*GetLastSystemInfoResponse) ProtoMessage() {}
 
 func (x *GetLastSystemInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[5]
+	mi := &file_proto_monitor_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -377,7 +524,7 @@ func (x *GetLastSystemInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLastSystemInfoResponse.ProtoReflect.Descriptor instead.
 func (*GetLastSystemInfoResponse) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{5}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetLastSystemInfoResponse) GetInfo() *SystemInfo {
@@ -385,6 +532,13 @@ func (x *GetLastSystemInfoResponse) GetInfo() *SystemInfo {
 		return x.Info
 	}
 	return nil
+}
+
+func (x *GetLastSystemInfoResponse) GetAlertMessage() string {
+	if x != nil {
+		return x.AlertMessage
+	}
+	return ""
 }
 
 // 获取agent列表请求
@@ -396,7 +550,7 @@ type ListAgentsRequest struct {
 
 func (x *ListAgentsRequest) Reset() {
 	*x = ListAgentsRequest{}
-	mi := &file_proto_monitor_proto_msgTypes[6]
+	mi := &file_proto_monitor_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -408,7 +562,7 @@ func (x *ListAgentsRequest) String() string {
 func (*ListAgentsRequest) ProtoMessage() {}
 
 func (x *ListAgentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[6]
+	mi := &file_proto_monitor_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,7 +575,7 @@ func (x *ListAgentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAgentsRequest.ProtoReflect.Descriptor instead.
 func (*ListAgentsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{6}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{8}
 }
 
 // 获取agent列表响应
@@ -434,7 +588,7 @@ type ListAgentsResponse struct {
 
 func (x *ListAgentsResponse) Reset() {
 	*x = ListAgentsResponse{}
-	mi := &file_proto_monitor_proto_msgTypes[7]
+	mi := &file_proto_monitor_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -446,7 +600,7 @@ func (x *ListAgentsResponse) String() string {
 func (*ListAgentsResponse) ProtoMessage() {}
 
 func (x *ListAgentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[7]
+	mi := &file_proto_monitor_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -459,7 +613,7 @@ func (x *ListAgentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAgentsResponse.ProtoReflect.Descriptor instead.
 func (*ListAgentsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{7}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListAgentsResponse) GetAgents() []*AgentInfo {
@@ -479,7 +633,7 @@ type CheckServerStatusRequest struct {
 
 func (x *CheckServerStatusRequest) Reset() {
 	*x = CheckServerStatusRequest{}
-	mi := &file_proto_monitor_proto_msgTypes[8]
+	mi := &file_proto_monitor_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -491,7 +645,7 @@ func (x *CheckServerStatusRequest) String() string {
 func (*CheckServerStatusRequest) ProtoMessage() {}
 
 func (x *CheckServerStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[8]
+	mi := &file_proto_monitor_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -504,7 +658,7 @@ func (x *CheckServerStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckServerStatusRequest.ProtoReflect.Descriptor instead.
 func (*CheckServerStatusRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{8}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CheckServerStatusRequest) GetHostname() string {
@@ -525,7 +679,7 @@ type CheckServerStatusResponse struct {
 
 func (x *CheckServerStatusResponse) Reset() {
 	*x = CheckServerStatusResponse{}
-	mi := &file_proto_monitor_proto_msgTypes[9]
+	mi := &file_proto_monitor_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -537,7 +691,7 @@ func (x *CheckServerStatusResponse) String() string {
 func (*CheckServerStatusResponse) ProtoMessage() {}
 
 func (x *CheckServerStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[9]
+	mi := &file_proto_monitor_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -550,7 +704,7 @@ func (x *CheckServerStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckServerStatusResponse.ProtoReflect.Descriptor instead.
 func (*CheckServerStatusResponse) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{9}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *CheckServerStatusResponse) GetOnline() bool {
@@ -581,7 +735,7 @@ type SystemInfo struct {
 
 func (x *SystemInfo) Reset() {
 	*x = SystemInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[10]
+	mi := &file_proto_monitor_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -593,7 +747,7 @@ func (x *SystemInfo) String() string {
 func (*SystemInfo) ProtoMessage() {}
 
 func (x *SystemInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[10]
+	mi := &file_proto_monitor_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -606,7 +760,7 @@ func (x *SystemInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SystemInfo.ProtoReflect.Descriptor instead.
 func (*SystemInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{10}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SystemInfo) GetHostInfo() *HostInfo {
@@ -659,7 +813,7 @@ type HostInfo struct {
 
 func (x *HostInfo) Reset() {
 	*x = HostInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[11]
+	mi := &file_proto_monitor_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -671,7 +825,7 @@ func (x *HostInfo) String() string {
 func (*HostInfo) ProtoMessage() {}
 
 func (x *HostInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[11]
+	mi := &file_proto_monitor_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -684,7 +838,7 @@ func (x *HostInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HostInfo.ProtoReflect.Descriptor instead.
 func (*HostInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{11}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *HostInfo) GetId() int32 {
@@ -743,7 +897,7 @@ type CPUInfo struct {
 
 func (x *CPUInfo) Reset() {
 	*x = CPUInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[12]
+	mi := &file_proto_monitor_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -755,7 +909,7 @@ func (x *CPUInfo) String() string {
 func (*CPUInfo) ProtoMessage() {}
 
 func (x *CPUInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[12]
+	mi := &file_proto_monitor_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -768,7 +922,7 @@ func (x *CPUInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CPUInfo.ProtoReflect.Descriptor instead.
 func (*CPUInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{12}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CPUInfo) GetId() int32 {
@@ -822,7 +976,7 @@ type MemoryInfo struct {
 
 func (x *MemoryInfo) Reset() {
 	*x = MemoryInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[13]
+	mi := &file_proto_monitor_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -834,7 +988,7 @@ func (x *MemoryInfo) String() string {
 func (*MemoryInfo) ProtoMessage() {}
 
 func (x *MemoryInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[13]
+	mi := &file_proto_monitor_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -847,7 +1001,7 @@ func (x *MemoryInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MemoryInfo.ProtoReflect.Descriptor instead.
 func (*MemoryInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{13}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *MemoryInfo) GetId() int32 {
@@ -913,7 +1067,7 @@ type ProcessInfo struct {
 
 func (x *ProcessInfo) Reset() {
 	*x = ProcessInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[14]
+	mi := &file_proto_monitor_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -925,7 +1079,7 @@ func (x *ProcessInfo) String() string {
 func (*ProcessInfo) ProtoMessage() {}
 
 func (x *ProcessInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[14]
+	mi := &file_proto_monitor_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -938,7 +1092,7 @@ func (x *ProcessInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessInfo.ProtoReflect.Descriptor instead.
 func (*ProcessInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{14}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ProcessInfo) GetId() int32 {
@@ -990,7 +1144,7 @@ type NetworkInfo struct {
 
 func (x *NetworkInfo) Reset() {
 	*x = NetworkInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[15]
+	mi := &file_proto_monitor_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1002,7 +1156,7 @@ func (x *NetworkInfo) String() string {
 func (*NetworkInfo) ProtoMessage() {}
 
 func (x *NetworkInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[15]
+	mi := &file_proto_monitor_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1015,7 +1169,7 @@ func (x *NetworkInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NetworkInfo.ProtoReflect.Descriptor instead.
 func (*NetworkInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{15}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *NetworkInfo) GetId() int32 {
@@ -1068,7 +1222,7 @@ type AgentInfo struct {
 
 func (x *AgentInfo) Reset() {
 	*x = AgentInfo{}
-	mi := &file_proto_monitor_proto_msgTypes[16]
+	mi := &file_proto_monitor_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1080,7 +1234,7 @@ func (x *AgentInfo) String() string {
 func (*AgentInfo) ProtoMessage() {}
 
 func (x *AgentInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[16]
+	mi := &file_proto_monitor_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1093,7 +1247,7 @@ func (x *AgentInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentInfo.ProtoReflect.Descriptor instead.
 func (*AgentInfo) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{16}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *AgentInfo) GetHostName() string {
@@ -1148,7 +1302,7 @@ type GetHostLastUpdateTimeRequest struct {
 
 func (x *GetHostLastUpdateTimeRequest) Reset() {
 	*x = GetHostLastUpdateTimeRequest{}
-	mi := &file_proto_monitor_proto_msgTypes[17]
+	mi := &file_proto_monitor_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1160,7 +1314,7 @@ func (x *GetHostLastUpdateTimeRequest) String() string {
 func (*GetHostLastUpdateTimeRequest) ProtoMessage() {}
 
 func (x *GetHostLastUpdateTimeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[17]
+	mi := &file_proto_monitor_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1173,7 +1327,7 @@ func (x *GetHostLastUpdateTimeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHostLastUpdateTimeRequest.ProtoReflect.Descriptor instead.
 func (*GetHostLastUpdateTimeRequest) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{17}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GetHostLastUpdateTimeRequest) GetHostname() string {
@@ -1194,7 +1348,7 @@ type GetHostLastUpdateTimeResponse struct {
 
 func (x *GetHostLastUpdateTimeResponse) Reset() {
 	*x = GetHostLastUpdateTimeResponse{}
-	mi := &file_proto_monitor_proto_msgTypes[18]
+	mi := &file_proto_monitor_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1206,7 +1360,7 @@ func (x *GetHostLastUpdateTimeResponse) String() string {
 func (*GetHostLastUpdateTimeResponse) ProtoMessage() {}
 
 func (x *GetHostLastUpdateTimeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_monitor_proto_msgTypes[18]
+	mi := &file_proto_monitor_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1219,7 +1373,7 @@ func (x *GetHostLastUpdateTimeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHostLastUpdateTimeResponse.ProtoReflect.Descriptor instead.
 func (*GetHostLastUpdateTimeResponse) Descriptor() ([]byte, []int) {
-	return file_proto_monitor_proto_rawDescGZIP(), []int{18}
+	return file_proto_monitor_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetHostLastUpdateTimeResponse) GetLastUpdated() string {
@@ -1240,7 +1394,7 @@ var File_proto_monitor_proto protoreflect.FileDescriptor
 
 const file_proto_monitor_proto_rawDesc = "" +
 	"\n" +
-	"\x13proto/monitor.proto\x12\amonitor\"\xed\x01\n" +
+	"\x13proto/monitor.proto\x12\amonitor\"\xb7\x02\n" +
 	"\x13InstallAgentRequest\x12\x12\n" +
 	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
 	"\x04user\x18\x02 \x01(\tR\x04user\x12\x1a\n" +
@@ -1250,12 +1404,24 @@ const file_proto_monitor_proto_rawDesc = "" +
 	"\x02os\x18\x06 \x01(\tR\x02os\x12\x1a\n" +
 	"\bplatform\x18\a \x01(\tR\bplatform\x12\x1f\n" +
 	"\vkernel_arch\x18\b \x01(\tR\n" +
-	"kernelArch\x12\x14\n" +
-	"\x05token\x18\t \x01(\tR\x05token\"`\n" +
+	"kernelArch\x12#\n" +
+	"\rmem_threshold\x18\t \x01(\x02R\fmemThreshold\x12#\n" +
+	"\rcpu_threshold\x18\n" +
+	" \x01(\x02R\fcpuThreshold\x12\x14\n" +
+	"\x05token\x18\v \x01(\tR\x05token\"`\n" +
 	"\x14InstallAgentResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x14\n" +
-	"\x05token\x18\x03 \x01(\tR\x05token\"V\n" +
+	"\x05token\x18\x03 \x01(\tR\x05token\"\x8b\x01\n" +
+	"\x15UninstallAgentRequest\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
+	"\x04user\x18\x02 \x01(\tR\x04user\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x12\n" +
+	"\x04port\x18\x04 \x01(\x05R\x04port\x12\x1a\n" +
+	"\bhostname\x18\x05 \x01(\tR\bhostname\"L\n" +
+	"\x16UninstallAgentResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"V\n" +
 	"\x14GetSystemInfoRequest\x12\x1a\n" +
 	"\bhostname\x18\x01 \x01(\tR\bhostname\x12\x12\n" +
 	"\x04from\x18\x02 \x01(\tR\x04from\x12\x0e\n" +
@@ -1263,9 +1429,10 @@ const file_proto_monitor_proto_rawDesc = "" +
 	"\x15GetSystemInfoResponse\x12'\n" +
 	"\x04info\x18\x01 \x01(\v2\x13.monitor.SystemInfoR\x04info\"6\n" +
 	"\x18GetLastSystemInfoRequest\x12\x1a\n" +
-	"\bhostname\x18\x01 \x01(\tR\bhostname\"D\n" +
+	"\bhostname\x18\x01 \x01(\tR\bhostname\"i\n" +
 	"\x19GetLastSystemInfoResponse\x12'\n" +
-	"\x04info\x18\x01 \x01(\v2\x13.monitor.SystemInfoR\x04info\"\x13\n" +
+	"\x04info\x18\x01 \x01(\v2\x13.monitor.SystemInfoR\x04info\x12#\n" +
+	"\ralert_message\x18\x02 \x01(\tR\falertMessage\"\x13\n" +
 	"\x11ListAgentsRequest\"@\n" +
 	"\x12ListAgentsResponse\x12*\n" +
 	"\x06agents\x18\x01 \x03(\v2\x12.monitor.AgentInfoR\x06agents\"6\n" +
@@ -1339,9 +1506,10 @@ const file_proto_monitor_proto_rawDesc = "" +
 	"\bhostname\x18\x01 \x01(\tR\bhostname\"Z\n" +
 	"\x1dGetHostLastUpdateTimeResponse\x12!\n" +
 	"\flast_updated\x18\x01 \x01(\tR\vlastUpdated\x12\x16\n" +
-	"\x06exists\x18\x02 \x01(\bR\x06exists2\xa0\x04\n" +
+	"\x06exists\x18\x02 \x01(\bR\x06exists2\xf5\x04\n" +
 	"\x0eMonitorService\x12M\n" +
-	"\fInstallAgent\x12\x1c.monitor.InstallAgentRequest\x1a\x1d.monitor.InstallAgentResponse\"\x00\x12P\n" +
+	"\fInstallAgent\x12\x1c.monitor.InstallAgentRequest\x1a\x1d.monitor.InstallAgentResponse\"\x00\x12S\n" +
+	"\x0eUninstallAgent\x12\x1e.monitor.UninstallAgentRequest\x1a\x1f.monitor.UninstallAgentResponse\"\x00\x12P\n" +
 	"\rGetSystemInfo\x12\x1d.monitor.GetSystemInfoRequest\x1a\x1e.monitor.GetSystemInfoResponse\"\x00\x12\\\n" +
 	"\x11GetLastSystemInfo\x12!.monitor.GetLastSystemInfoRequest\x1a\".monitor.GetLastSystemInfoResponse\"\x00\x12G\n" +
 	"\n" +
@@ -1361,51 +1529,55 @@ func file_proto_monitor_proto_rawDescGZIP() []byte {
 	return file_proto_monitor_proto_rawDescData
 }
 
-var file_proto_monitor_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_proto_monitor_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_proto_monitor_proto_goTypes = []any{
 	(*InstallAgentRequest)(nil),           // 0: monitor.InstallAgentRequest
 	(*InstallAgentResponse)(nil),          // 1: monitor.InstallAgentResponse
-	(*GetSystemInfoRequest)(nil),          // 2: monitor.GetSystemInfoRequest
-	(*GetSystemInfoResponse)(nil),         // 3: monitor.GetSystemInfoResponse
-	(*GetLastSystemInfoRequest)(nil),      // 4: monitor.GetLastSystemInfoRequest
-	(*GetLastSystemInfoResponse)(nil),     // 5: monitor.GetLastSystemInfoResponse
-	(*ListAgentsRequest)(nil),             // 6: monitor.ListAgentsRequest
-	(*ListAgentsResponse)(nil),            // 7: monitor.ListAgentsResponse
-	(*CheckServerStatusRequest)(nil),      // 8: monitor.CheckServerStatusRequest
-	(*CheckServerStatusResponse)(nil),     // 9: monitor.CheckServerStatusResponse
-	(*SystemInfo)(nil),                    // 10: monitor.SystemInfo
-	(*HostInfo)(nil),                      // 11: monitor.HostInfo
-	(*CPUInfo)(nil),                       // 12: monitor.CPUInfo
-	(*MemoryInfo)(nil),                    // 13: monitor.MemoryInfo
-	(*ProcessInfo)(nil),                   // 14: monitor.ProcessInfo
-	(*NetworkInfo)(nil),                   // 15: monitor.NetworkInfo
-	(*AgentInfo)(nil),                     // 16: monitor.AgentInfo
-	(*GetHostLastUpdateTimeRequest)(nil),  // 17: monitor.GetHostLastUpdateTimeRequest
-	(*GetHostLastUpdateTimeResponse)(nil), // 18: monitor.GetHostLastUpdateTimeResponse
+	(*UninstallAgentRequest)(nil),         // 2: monitor.UninstallAgentRequest
+	(*UninstallAgentResponse)(nil),        // 3: monitor.UninstallAgentResponse
+	(*GetSystemInfoRequest)(nil),          // 4: monitor.GetSystemInfoRequest
+	(*GetSystemInfoResponse)(nil),         // 5: monitor.GetSystemInfoResponse
+	(*GetLastSystemInfoRequest)(nil),      // 6: monitor.GetLastSystemInfoRequest
+	(*GetLastSystemInfoResponse)(nil),     // 7: monitor.GetLastSystemInfoResponse
+	(*ListAgentsRequest)(nil),             // 8: monitor.ListAgentsRequest
+	(*ListAgentsResponse)(nil),            // 9: monitor.ListAgentsResponse
+	(*CheckServerStatusRequest)(nil),      // 10: monitor.CheckServerStatusRequest
+	(*CheckServerStatusResponse)(nil),     // 11: monitor.CheckServerStatusResponse
+	(*SystemInfo)(nil),                    // 12: monitor.SystemInfo
+	(*HostInfo)(nil),                      // 13: monitor.HostInfo
+	(*CPUInfo)(nil),                       // 14: monitor.CPUInfo
+	(*MemoryInfo)(nil),                    // 15: monitor.MemoryInfo
+	(*ProcessInfo)(nil),                   // 16: monitor.ProcessInfo
+	(*NetworkInfo)(nil),                   // 17: monitor.NetworkInfo
+	(*AgentInfo)(nil),                     // 18: monitor.AgentInfo
+	(*GetHostLastUpdateTimeRequest)(nil),  // 19: monitor.GetHostLastUpdateTimeRequest
+	(*GetHostLastUpdateTimeResponse)(nil), // 20: monitor.GetHostLastUpdateTimeResponse
 }
 var file_proto_monitor_proto_depIdxs = []int32{
-	10, // 0: monitor.GetSystemInfoResponse.info:type_name -> monitor.SystemInfo
-	10, // 1: monitor.GetLastSystemInfoResponse.info:type_name -> monitor.SystemInfo
-	16, // 2: monitor.ListAgentsResponse.agents:type_name -> monitor.AgentInfo
-	11, // 3: monitor.SystemInfo.host_info:type_name -> monitor.HostInfo
-	12, // 4: monitor.SystemInfo.cpu_info:type_name -> monitor.CPUInfo
-	13, // 5: monitor.SystemInfo.memory_info:type_name -> monitor.MemoryInfo
-	14, // 6: monitor.SystemInfo.process_info:type_name -> monitor.ProcessInfo
-	15, // 7: monitor.SystemInfo.network_info:type_name -> monitor.NetworkInfo
+	12, // 0: monitor.GetSystemInfoResponse.info:type_name -> monitor.SystemInfo
+	12, // 1: monitor.GetLastSystemInfoResponse.info:type_name -> monitor.SystemInfo
+	18, // 2: monitor.ListAgentsResponse.agents:type_name -> monitor.AgentInfo
+	13, // 3: monitor.SystemInfo.host_info:type_name -> monitor.HostInfo
+	14, // 4: monitor.SystemInfo.cpu_info:type_name -> monitor.CPUInfo
+	15, // 5: monitor.SystemInfo.memory_info:type_name -> monitor.MemoryInfo
+	16, // 6: monitor.SystemInfo.process_info:type_name -> monitor.ProcessInfo
+	17, // 7: monitor.SystemInfo.network_info:type_name -> monitor.NetworkInfo
 	0,  // 8: monitor.MonitorService.InstallAgent:input_type -> monitor.InstallAgentRequest
-	2,  // 9: monitor.MonitorService.GetSystemInfo:input_type -> monitor.GetSystemInfoRequest
-	4,  // 10: monitor.MonitorService.GetLastSystemInfo:input_type -> monitor.GetLastSystemInfoRequest
-	6,  // 11: monitor.MonitorService.ListAgents:input_type -> monitor.ListAgentsRequest
-	8,  // 12: monitor.MonitorService.CheckServerStatus:input_type -> monitor.CheckServerStatusRequest
-	17, // 13: monitor.MonitorService.GetHostLastUpdateTime:input_type -> monitor.GetHostLastUpdateTimeRequest
-	1,  // 14: monitor.MonitorService.InstallAgent:output_type -> monitor.InstallAgentResponse
-	3,  // 15: monitor.MonitorService.GetSystemInfo:output_type -> monitor.GetSystemInfoResponse
-	5,  // 16: monitor.MonitorService.GetLastSystemInfo:output_type -> monitor.GetLastSystemInfoResponse
-	7,  // 17: monitor.MonitorService.ListAgents:output_type -> monitor.ListAgentsResponse
-	9,  // 18: monitor.MonitorService.CheckServerStatus:output_type -> monitor.CheckServerStatusResponse
-	18, // 19: monitor.MonitorService.GetHostLastUpdateTime:output_type -> monitor.GetHostLastUpdateTimeResponse
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
+	2,  // 9: monitor.MonitorService.UninstallAgent:input_type -> monitor.UninstallAgentRequest
+	4,  // 10: monitor.MonitorService.GetSystemInfo:input_type -> monitor.GetSystemInfoRequest
+	6,  // 11: monitor.MonitorService.GetLastSystemInfo:input_type -> monitor.GetLastSystemInfoRequest
+	8,  // 12: monitor.MonitorService.ListAgents:input_type -> monitor.ListAgentsRequest
+	10, // 13: monitor.MonitorService.CheckServerStatus:input_type -> monitor.CheckServerStatusRequest
+	19, // 14: monitor.MonitorService.GetHostLastUpdateTime:input_type -> monitor.GetHostLastUpdateTimeRequest
+	1,  // 15: monitor.MonitorService.InstallAgent:output_type -> monitor.InstallAgentResponse
+	3,  // 16: monitor.MonitorService.UninstallAgent:output_type -> monitor.UninstallAgentResponse
+	5,  // 17: monitor.MonitorService.GetSystemInfo:output_type -> monitor.GetSystemInfoResponse
+	7,  // 18: monitor.MonitorService.GetLastSystemInfo:output_type -> monitor.GetLastSystemInfoResponse
+	9,  // 19: monitor.MonitorService.ListAgents:output_type -> monitor.ListAgentsResponse
+	11, // 20: monitor.MonitorService.CheckServerStatus:output_type -> monitor.CheckServerStatusResponse
+	20, // 21: monitor.MonitorService.GetHostLastUpdateTime:output_type -> monitor.GetHostLastUpdateTimeResponse
+	15, // [15:22] is the sub-list for method output_type
+	8,  // [8:15] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1422,7 +1594,7 @@ func file_proto_monitor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_monitor_proto_rawDesc), len(file_proto_monitor_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

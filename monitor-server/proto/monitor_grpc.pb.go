@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	MonitorService_InstallAgent_FullMethodName          = "/monitor.MonitorService/InstallAgent"
+	MonitorService_UninstallAgent_FullMethodName        = "/monitor.MonitorService/UninstallAgent"
 	MonitorService_GetSystemInfo_FullMethodName         = "/monitor.MonitorService/GetSystemInfo"
 	MonitorService_GetLastSystemInfo_FullMethodName     = "/monitor.MonitorService/GetLastSystemInfo"
 	MonitorService_ListAgents_FullMethodName            = "/monitor.MonitorService/ListAgents"
@@ -35,6 +36,8 @@ const (
 type MonitorServiceClient interface {
 	// 安装agent
 	InstallAgent(ctx context.Context, in *InstallAgentRequest, opts ...grpc.CallOption) (*InstallAgentResponse, error)
+	// 删除agent
+	UninstallAgent(ctx context.Context, in *UninstallAgentRequest, opts ...grpc.CallOption) (*UninstallAgentResponse, error)
 	// 获取系统信息
 	GetSystemInfo(ctx context.Context, in *GetSystemInfoRequest, opts ...grpc.CallOption) (*GetSystemInfoResponse, error)
 	// 获取最新的系统信息
@@ -59,6 +62,16 @@ func (c *monitorServiceClient) InstallAgent(ctx context.Context, in *InstallAgen
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(InstallAgentResponse)
 	err := c.cc.Invoke(ctx, MonitorService_InstallAgent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *monitorServiceClient) UninstallAgent(ctx context.Context, in *UninstallAgentRequest, opts ...grpc.CallOption) (*UninstallAgentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UninstallAgentResponse)
+	err := c.cc.Invoke(ctx, MonitorService_UninstallAgent_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +136,8 @@ func (c *monitorServiceClient) GetHostLastUpdateTime(ctx context.Context, in *Ge
 type MonitorServiceServer interface {
 	// 安装agent
 	InstallAgent(context.Context, *InstallAgentRequest) (*InstallAgentResponse, error)
+	// 删除agent
+	UninstallAgent(context.Context, *UninstallAgentRequest) (*UninstallAgentResponse, error)
 	// 获取系统信息
 	GetSystemInfo(context.Context, *GetSystemInfoRequest) (*GetSystemInfoResponse, error)
 	// 获取最新的系统信息
@@ -145,6 +160,9 @@ type UnimplementedMonitorServiceServer struct{}
 
 func (UnimplementedMonitorServiceServer) InstallAgent(context.Context, *InstallAgentRequest) (*InstallAgentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InstallAgent not implemented")
+}
+func (UnimplementedMonitorServiceServer) UninstallAgent(context.Context, *UninstallAgentRequest) (*UninstallAgentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UninstallAgent not implemented")
 }
 func (UnimplementedMonitorServiceServer) GetSystemInfo(context.Context, *GetSystemInfoRequest) (*GetSystemInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSystemInfo not implemented")
@@ -196,6 +214,24 @@ func _MonitorService_InstallAgent_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MonitorServiceServer).InstallAgent(ctx, req.(*InstallAgentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MonitorService_UninstallAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UninstallAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MonitorServiceServer).UninstallAgent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MonitorService_UninstallAgent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MonitorServiceServer).UninstallAgent(ctx, req.(*UninstallAgentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -300,6 +336,10 @@ var MonitorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InstallAgent",
 			Handler:    _MonitorService_InstallAgent_Handler,
+		},
+		{
+			MethodName: "UninstallAgent",
+			Handler:    _MonitorService_UninstallAgent_Handler,
 		},
 		{
 			MethodName: "GetSystemInfo",

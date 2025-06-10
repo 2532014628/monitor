@@ -118,15 +118,48 @@ func (r *RedisRepository) Delete(ctx context.Context, key string) error {
 // AddSystemInfo 添加系统信息
 func (r *RedisRepository) AddSystemInfo(ctx context.Context, request RequestData) error {
 	timestamp := time.Now().Unix() // 获取当前时间戳
-	key := fmt.Sprintf("system_info:%s:%d", request.HostInfo.Hostname, timestamp)
-	jsonData, err := json.Marshal(request)
+	baseKey := fmt.Sprintf("system_info:%s:%d", request.HostInfo.Hostname, timestamp)
+
+	// 存储主机信息
+	hostKey := fmt.Sprintf("%s:host", baseKey)
+	hostData, err := json.Marshal(request.HostInfo)
 	if err != nil {
-		return fmt.Errorf("failed to marshal data to JSON: %s", err)
+		return fmt.Errorf("failed to marshal host info: %s", err)
 	}
-	err = r.client.Set(ctx, key, jsonData, 30*time.Minute).Err()
+	if err := r.client.Set(ctx, hostKey, hostData, 30*time.Minute).Err(); err != nil {
+		return fmt.Errorf("failed to insert host info into Redis: %s", err)
+	}
+
+	// 存储CPU信息
+	cpuKey := fmt.Sprintf("%s:cpu", baseKey)
+	cpuData, err := json.Marshal(request.CPUInfo)
 	if err != nil {
-		return fmt.Errorf("failed to insert data into Redis: %s", err)
+		return fmt.Errorf("failed to marshal CPU info: %s", err)
 	}
+	if err := r.client.Set(ctx, cpuKey, cpuData, 30*time.Minute).Err(); err != nil {
+		return fmt.Errorf("failed to insert CPU info into Redis: %s", err)
+	}
+
+	// 存储内存信息
+	memKey := fmt.Sprintf("%s:mem", baseKey)
+	memData, err := json.Marshal(request.MemInfo)
+	if err != nil {
+		return fmt.Errorf("failed to marshal memory info: %s", err)
+	}
+	if err := r.client.Set(ctx, memKey, memData, 30*time.Minute).Err(); err != nil {
+		return fmt.Errorf("failed to insert memory info into Redis: %s", err)
+	}
+
+	// 存储网络信息
+	netKey := fmt.Sprintf("%s:net", baseKey)
+	netData, err := json.Marshal(request.NetInfo)
+	if err != nil {
+		return fmt.Errorf("failed to marshal network info: %s", err)
+	}
+	if err := r.client.Set(ctx, netKey, netData, 30*time.Minute).Err(); err != nil {
+		return fmt.Errorf("failed to insert network info into Redis: %s", err)
+	}
+
 	return nil
 }
 
@@ -142,4 +175,19 @@ func (r *RedisRepository) GetLastUpdateTime(ctx context.Context, key string) (st
 	}
 
 	return lastUpdatedStr, nil
+}
+
+// CleanHostData 清理主机相关的所有数据
+func (r *RedisRepository) CleanHostData(ctx context.Context, hostname string) error {
+	// 删除主机相关的所有键
+	key := "host:" + hostname
+	if err := r.client.Del(ctx, key).Err(); err != nil {
+		return fmt.Errorf("删除Redis键 %s 失败: %v", key, err)
+	}
+	return nil
+}
+
+// Set 设置键值对
+func (r *RedisRepository) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	return r.client.Set(ctx, key, value, expiration).Err()
 }

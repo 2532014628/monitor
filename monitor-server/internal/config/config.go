@@ -50,7 +50,7 @@ func getConfigPath() string {
 	currentDir := filepath.Dir(filename)
 
 	// 构建到项目根目录的相对路径
-	configPath := filepath.Join(currentDir, "..", "..", "config", "internal", "configs", "config.yaml")
+	configPath := filepath.Join(currentDir, "..", "..", "internal", "config", "configs", "config.yaml")
 
 	// 将路径转换为绝对路径并简化路径
 	absPath, err := filepath.Abs(configPath)

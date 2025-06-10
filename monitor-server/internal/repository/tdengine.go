@@ -8,6 +8,8 @@ import (
 	"monitor-server/internal/config"
 	"monitor-server/internal/model"
 	pb "monitor-server/proto"
+
+	_ "github.com/taosdata/driver-go/v3/taosSql"
 )
 
 type TDengineRepository struct {
@@ -135,7 +137,6 @@ type RequestData struct {
 	CPUInfo  []model.CPUInfo     `json:"cpu_info"`  // CPU 信息
 	HostInfo model.HostInfo      `json:"host_info"` // 主机信息
 	MemInfo  model.MemoryInfo    `json:"mem_info"`  // 内存信息
-	ProInfo  []model.ProcessInfo `json:"pro_info"`  // 进程信息
 	NetInfo  []model.NetworkInfo `json:"net_info"`  // 网络信息
 }
 
@@ -161,4 +162,25 @@ func (r *TDengineRepository) InsertSystemInfo(hostname string, hostInfo model.Ho
 // Close 关闭数据库连接
 func (r *TDengineRepository) Close() error {
 	return r.db.Close()
+}
+
+// CleanHostData 清理主机相关的所有数据
+func (r *TDengineRepository) CleanHostData(ctx context.Context, hostname string) error {
+	// 删除主机相关的所有表
+	tables := []string{
+		fmt.Sprintf("%s_system_info", hostname),
+		fmt.Sprintf("%s_cpu_info", hostname),
+		fmt.Sprintf("%s_memory_info", hostname),
+		fmt.Sprintf("%s_process_info", hostname),
+		fmt.Sprintf("%s_network_info", hostname),
+	}
+
+	for _, table := range tables {
+		query := fmt.Sprintf("DROP TABLE IF EXISTS %s", table)
+		if _, err := r.db.ExecContext(ctx, query); err != nil {
+			return fmt.Errorf("删除表 %s 失败: %v", table, err)
+		}
+	}
+
+	return nil
 }

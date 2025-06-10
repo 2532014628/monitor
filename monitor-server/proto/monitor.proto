@@ -9,6 +9,9 @@ service MonitorService {
   // 安装agent
   rpc InstallAgent(InstallAgentRequest) returns (InstallAgentResponse) {}
   
+  // 删除agent
+  rpc UninstallAgent(UninstallAgentRequest) returns (UninstallAgentResponse) {}
+  
   // 获取系统信息
   rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {}
   
@@ -35,7 +38,9 @@ message InstallAgentRequest {
   string os = 6;
   string platform = 7;
   string kernel_arch = 8;
-  string token = 9;
+  float mem_threshold=9;
+  float cpu_threshold=10;
+  string token = 11;
 }
 
 // 安装agent响应
@@ -43,6 +48,21 @@ message InstallAgentResponse {
   bool success = 1;
   string message = 2;
   string token = 3;
+}
+
+// 删除agent请求
+message UninstallAgentRequest {
+  string host = 1;
+  string user = 2;
+  string password = 3;
+  int32 port = 4;
+  string hostname = 5;
+}
+
+// 删除agent响应
+message UninstallAgentResponse {
+  bool success = 1;
+  string message = 2;
 }
 
 // 获取系统信息请求
@@ -65,6 +85,7 @@ message GetLastSystemInfoRequest {
 // 获取最新系统信息响应
 message GetLastSystemInfoResponse {
   SystemInfo info = 1;
+  string alert_message = 2;  // 告警信息
 }
 
 // 获取agent列表请求
